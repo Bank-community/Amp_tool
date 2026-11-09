@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>EnviaShipping — Courier Cost Calculator</title>
+
+  <!-- Preconnect first, then font with display=swap prevents FOIT + layout shift -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --font:       'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --bg:         #0a0f1e;
+      --surface:    #111827;
+      --surface2:   #1a2236;
+      --border:     #1e2d47;
+      --accent:     #00d4ff;
+      --accent-h:   #0ea5e9;
+      --green:      #16a34a;
+      --green-bg:   #f0fdf4;
+      --green-bd:   #bbf7d0;
+      --amber:      #d97706;
+      --text:       #f0f6ff;
+      --text-2:     #A87A00;
+      --text-3:     #94a3b8;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg:  0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+      --r-sm:       8px;
+      --r:          12px;
+      --r-lg:       16px;
+      --input-h:    46px;
+      --toggle-h:   58px;
+      --header-h:   64px;
+    }
+
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      /* Reserve scrollbar width to prevent horizontal jump */
+      scrollbar-gutter: stable;
+    }
+
+    /* ── HEADER ── */
+    header {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+      letter-spacing: 0;
+    }
+
+    .header-title {
+      font-size: 1rem; font-weight: 700;
+      color: var(--text); letter-spacing: -0.01em;
+    }
+    .header-title span { color: var(--accent); }
+
+    .header-badge {
+      margin-left: auto;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      color: var(--accent); font-size: 0.68rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 100px;
+      letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+    }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    .page-title {
+      font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+      font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+      /* Pre-reserve height so font swap doesn't shift content */
+      min-height: 2.6rem;
+    }
+    .page-title span { color: var(--accent); }
+
+    .page-sub {
+      margin-top: 6px; color: var(--text-2);
+      font-size: 0.88rem; font-weight: 400;
+      /* Reserve line to prevent shift */
+      min-height: 1.35rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── GRID ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: calc(var(--header-h) + 16px);
+    }
+    @media (max-width: 860px) { .panel { position: static; } }
+
+    .panel-label {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 20px;
+    }
+
+    /* ── FORM ── */
+    .field { margin-bottom: 16px; }
+
+    .field-label {
+      display: block;
+      font-size: 0.76rem; font-weight: 600;
+      color: var(--text-2); margin-bottom: 6px;
+      /* Fixed height prevents font-swap label shift */
+      line-height: 1.4; min-height: 1.08rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-prefix {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent); font-weight: 600; font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      height: var(--input-h);
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      color: #878787;
+      font-family: var(--font);
+      font-weight: 500;
+      padding: 0 14px;
+      outline: none;
+      appearance: none; -webkit-appearance: none;
+      /* Only non-layout properties in transition */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      /* Prevent iOS zoom on focus (font-size must be >= 16px) */
+      font-size: max(16px, 0.88rem);
+    }
+
+    input[type="number"] { padding-left: 30px; }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    input[type="number"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      background: #fff;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .field-divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+    /* ── TOGGLE ROWS ── */
+    .toggle-group {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      min-height: var(--toggle-h);
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 14px;
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+      cursor: default;
+    }
+    .toggle-row.is-on {
+      border-color: #bfdbfe; background: #eff6ff;
+    }
+.toggle-row.is-on .toggle-label {
+  color: #000000;
+}
+
+.toggle-row.is-on .toggle-desc {
+  color: #475569; 
+}
+
+
+    .toggle-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+    .toggle-label {
+      font-size: 0.83rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .toggle-desc { font-size: 0.7rem; font-weight: 400; color: var(--text-3); }
+
+    /* iOS toggle switch — GPU-composited, zero layout cost */
+    .toggle-switch { position: relative; flex-shrink: 0; margin-left: 12px; }
+    .toggle-switch input {
+      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+    }
+    .toggle-switch .knob {
+      display: block; width: 46px; height: 26px;
+      background: #cbd5e1; border-radius: 100px; cursor: pointer;
+      will-change: background-color;
+      transition: background-color 0.22s ease;
+      position: relative;
+    }
+    .toggle-switch .knob::after {
+      content: ''; position: absolute;
+      left: 3px; top: 3px; width: 20px; height: 20px;
+      background: #fff; border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+      will-change: transform;
+      transition: transform 0.22s ease;
+    }
+    .toggle-switch input:checked + .knob { background: var(--accent); }
+    .toggle-switch input:checked + .knob::after { transform: translateX(20px); }
+    .toggle-switch input:focus-visible + .knob { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── COD SUB-PANEL — height reveal, no display toggle = no reflow ── */
+    .cod-sub-wrap {
+      overflow: hidden; max-height: 0;
+      transition: max-height 0.28s ease, opacity 0.28s ease;
+      opacity: 0;
+    }
+    .cod-sub-wrap.open { max-height: 90px; opacity: 1; }
+
+    .cod-sub {
+      background: #eff6ff; border: 1.5px solid #bfdbfe;
+      border-radius: var(--r-sm); padding: 12px 14px; margin-top: 6px;
+    }
+    .cod-mode-label {
+      font-size: 0.7rem; font-weight: 600; color: var(--text-2);
+      margin-bottom: 8px;
+    }
+    .pill-toggle { display: flex; gap: 6px; }
+    .pill-btn {
+      flex: 1; height: 32px;
+      border-radius: 6px; border: 1.5px solid var(--border);
+      background: #fff; color: var(--text-2);
+      font-family: var(--font); font-size: 0.76rem; font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      white-space: nowrap;
+    }
+    .pill-btn:hover { background: #f1f5f9; }
+    .pill-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── BUTTONS ── */
+    #calc-btn {
+      width: 100%; height: 48px;
+      border-radius: var(--r-sm); border: none;
+      background: var(--accent); color: #fff;
+      font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.01em;
+      transition: filter 0.18s ease, transform 0.1s ease;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    #calc-btn:hover { filter: brightness(1.08); }
+    #calc-btn:active { transform: scale(0.987); filter: brightness(0.96); }
+
+    .save-btn {
+      width: 100%; height: 40px; margin-top: 8px;
+      border-radius: var(--r-sm); border: 1.5px solid var(--border);
+      background: transparent; color: var(--text-2);
+      font-family: var(--font); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .save-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+
+    /* ── RESULTS COLUMN ── */
+    .results-col {
+      /* Pre-allocate space so left panel never jumps */
+      min-height: 420px;
+      position: relative;
+    }
+
+    /* Empty state */
+    #empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 420px;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      text-align: center; padding: 40px 20px;
+      transition: opacity 0.2s ease;
+      position: relative;
+    }
+    #empty-state.hidden {
+      opacity: 0; pointer-events: none;
+      position: absolute; top: 0; left: 0; right: 0;
+      visibility: hidden;
+    }
+    .es-icon { font-size: 2.8rem; margin-bottom: 12px; line-height: 1; }
+    .es-title { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .es-sub { font-size: 0.82rem; color: var(--text-3); line-height: 1.65; }
+
+    /* Results section — opacity+transform reveal, zero reflow */
+    #results-section {
+      opacity: 0; pointer-events: none;
+      transform: translateY(8px);
+      will-change: opacity, transform;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #results-section.visible {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+
+    /* ── BEST BANNER ── */
+    .best-banner {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--green-bg); border: 1.5px solid var(--green-bd);
+      border-radius: var(--r-lg);
+      padding: 18px 20px; margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      /* Fixed height prevents banner jump between calculations */
+      min-height: 84px;
+    }
+    .best-icon {
+      width: 44px; height: 44px; background: var(--green);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .best-meta { flex: 1; min-width: 0; }
+    .best-label {
+      font-size: 0.66rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 1px;
+    }
+    .best-name {
+      font-size: 0.98rem; font-weight: 700; color: #000;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.4; min-height: 1.4rem;
+    }
+    .best-cost { font-size: 0.74rem; color: var(--text-2); min-height: 1.1rem; }
+    .best-price {
+      font-size: 1.6rem; font-weight: 800; color: var(--green);
+      flex-shrink: 0; white-space: nowrap;
+      /* Fixed width prevents banner resize when price digits change */
+      min-width: 88px; text-align: right; line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── RESULTS HEADER ── */
+    .results-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; min-height: 22px;
+    }
+    .results-title {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2);
+    }
+    .sort-info { font-size: 0.7rem; color: var(--text-3); }
+
+    /* ── COURIER CARDS ── */
+    .cards-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .courier-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      /* Fixed min-height = no height jump between cards */
+      min-height: 86px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+      /* GPU layer */
+      will-change: transform;
+      /* Start invisible for stagger animation */
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    /* Revealed state — added by JS after rAF */
+    .courier-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.22s ease, transform 0.22s ease,
+                  border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    /* Hover — only composited props */
+    .courier-card.revealed:hover {
+      transform: translateY(-1px);
+      border-color: #bfdbfe;
+      box-shadow: var(--shadow-md);
+    }
+
+    .courier-card.cheapest {
+      border-color: var(--green-bd);
+      background: var(--green-bg);
+      box-shadow: 0 4px 12px rgba(22,163,74,0.08);
+    }
+.courier-card.cheapest .card-name-text {
+  color: #000000;
+}
+.courier-card.cheapest .bi-val {
+  color: #000000;
+}
+
+    .courier-card.cheapest.revealed:hover { border-color: #86efac; }
+
+    .card-left { min-width: 0; }
+
+    .card-courier-name {
+      display: flex; align-items: center; gap: 7px;
+      margin-bottom: 7px;
+      /* Fixed height — emoji + text won't shift */
+      min-height: 22px;
+    }
+    .card-emoji { font-size: 1rem; line-height: 1; flex-shrink: 0; width: 20px; text-align: center; }
+    .card-name-text {
+      font-size: 0.86rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cheapest-tag {
+      background: var(--green); color: #fff;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 100px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      flex-shrink: 0; white-space: nowrap;
+    }
+
+    .card-breakdown { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    .breakdown-item { display: flex; flex-direction: column; min-width: 52px; }
+
+    .bi-label {
+      font-size: 0.6rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-3); line-height: 1.3;
+      min-height: 0.88rem;
+    }
+    .bi-val {
+      font-size: 0.8rem; font-weight: 600; color: var(--text);
+      line-height: 1.4; min-height: 1.15rem;
+      /* Tabular nums — value changes won't shift widths */
+      font-variant-numeric: tabular-nums;
+    }
+    .bi-val.is-accent { color: var(--accent); }
+    .bi-val.is-amber  { color: var(--amber); }
+
+    .card-right {
+      text-align: right; flex-shrink: 0;
+      /* Fixed width prevents grid column from resizing */
+      min-width: 92px;
+    }
+    .card-total-label {
+      font-size: 0.6rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-3); min-height: 0.88rem;
+    }
+    .card-total {
+      font-size: 1.3rem; font-weight: 800; color: var(--text);
+      line-height: 1.2; white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      /* Reserve min-height to prevent card height bounce */
+      min-height: 1.6rem;
+    }
+    .courier-card.cheapest .card-total { color: var(--green); }
+
+    .card-rank { font-size: 0.66rem; color: var(--text-3); min-height: 1rem; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: #fff;
+      padding: 11px 18px; border-radius: var(--r-sm);
+      font-size: 0.8rem; font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(72px) translateZ(0);
+      opacity: 0;
+      will-change: transform, opacity;
+      transition: transform 0.28s ease, opacity 0.28s ease;
+      z-index: 9999; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0) translateZ(0); opacity: 1; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .wrapper { padding: 20px 14px 48px; }
+      header   { padding: 0 16px; }
+      .header-badge { display: none; }
+      .panel   { padding: 18px 16px; }
+      .best-banner { flex-wrap: wrap; min-height: auto; padding: 14px 16px; gap: 10px; }
+      .best-price  { min-width: unset; }
+      .card-breakdown { gap: 10px; }
+      .breakdown-item { min-width: 46px; }
+      .card-total { font-size: 1.15rem; }
+      .card-right { min-width: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">ES</div>
+  <span class="header-title">Envia<span>Shipping</span></span>
+  <span class="header-badge">Enterprise Plan</span>
+</header>
+
+<div class="wrapper">
+
+  <h1 class="page-title">Courier Cost <span>Calculator</span></h1>
+ 
+
+  <div class="main-grid">
+
+    <!-- LEFT: Input Panel -->
+    <div class="panel">
+      <div class="panel-label">Configure Shipment</div>
+
+      <div class="field">
+        <label class="field-label" for="order-amount">Order Amount</label>
+        <div class="input-wrap">
+          <span class="input-prefix">₹</span>
+          <input type="number" id="order-amount" placeholder="0" min="0" inputmode="decimal" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="weight-select">Shipment Weight</label>
+        <select id="weight-select">
+          <option value="0.5">500 g (0.5 kg)</option>
+          <option value="1">1 kg</option>
+          <option value="1.5">1.5 kg</option>
+          <option value="2">2 kg</option>
+          <option value="2.5">2.5 kg</option>
+          <option value="3">3 kg</option>
+          <option value="3.5">3.5 kg</option>
+          <option value="4">4 kg</option>
+          <option value="4.5">4.5 kg</option>
+          <option value="5">5 kg</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="zone-select">Delivery Zone</label>
+        <select id="zone-select">
+          <option value="A">Zone A — Within City</option>
+          <option value="B">Zone B — City to City</option>
+          <option value="C">Zone C — Within State</option>
+          <option value="D">Zone D — Metro to Metro</option>
+          <option value="E">Zone E — Rest of India</option>
+          <option value="F">Zone F — Remote Area</option>
+        </select>
+      </div>
+
+      <div class="field-divider"></div>
+
+      <div class="toggle-group">
+
+        <div class="toggle-row" id="cod-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Cash on Delivery (COD)</span>
+            <span class="toggle-desc">Customer pays on delivery</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cod-toggle" />
+            <span class="knob"></span>
+          </label>
+        </div>
+
+        <div class="cod-sub-wrap" id="cod-sub-wrap">
+          <div class="cod-sub">
+            <div class="cod-mode-label">COD Charge Mode</div>
+            <div class="pill-toggle">
+              <button class="pill-btn active" id="cod-percent-btn">2% of Order</button>
+              <button class="pill-btn" id="cod-flat-btn">Flat ₹40</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-row" id="rto-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Return to Origin (RTO)</span>
+            <span class="toggle-desc">Include return shipping cost</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="rto-toggle" />
+            <span class="knob"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row is-on" id="gst-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Include GST (18%)</span>
+            <span class="toggle-desc">Goods &amp; Services Tax</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="gst-toggle" checked />
+            <span class="knob"></span>
+          </label>
+        </div>
+
+      </div>
+
+      <button id="calc-btn">Calculate All Rates</button>
+      <button class="save-btn" id="save-btn">💾 &nbsp;Save Settings</button>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="results-col">
+
+      <div id="empty-state">
+        <div class="es-icon">📦</div>
+        <p class="es-title">Ready to compare</p>
+        <p class="es-sub">Fill in the shipment details on the left<br>and tap <strong>Calculate All Rates</strong>.</p>
+      </div>
+
+      <div id="results-section" aria-live="polite">
+        <div class="best-banner">
+          <div class="best-icon">🏆</div>
+          <div class="best-meta">
+            <div class="best-label">Best Recommendation</div>
+            <div class="best-name" id="best-name">&nbsp;</div>
+            <div class="best-cost" id="best-desc">&nbsp;</div>
+          </div>
+          <div class="best-price" id="best-price">&nbsp;</div>
+        </div>
+
+        <div class="results-header">
+          <span class="results-title">All Couriers</span>
+          <span class="sort-info">Sorted: lowest → highest</span>
+        </div>
+
+        <div class="cards-grid" id="cards-grid"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

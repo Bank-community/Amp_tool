@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMP KART — Tool OS</title>
+
+  <meta name="title" content="AMP KART — Tool OS" />
+  <meta name="description" content="AMP KART Control Panel - All your business tools in one place. Pricing Calculator, Image Compressor, QR Generator & more." />
+  <meta name="theme-color" content="#2979FF" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://golistapp.store/" />
+  <meta property="og:title" content="AMP KART — Tool OS" />
+  <meta property="og:description" content="AMP KART Control Panel - All your business tools in one place." />
+  <meta property="og:image" content="https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://golistapp.store/" />
+  <meta name="twitter:title" content="AMP KART — Tool OS" />
+  <meta name="twitter:description" content="AMP KART Control Panel - All your business tools in one place." />
+  <meta name="twitter:image" content="https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg" />
+
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="AMP KART" />
+  <link rel="apple-touch-icon" href="https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="AMP KART" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      /* ── NEW COLOR SYSTEM ── */
+      --bg:       #F5F7FA;
+      --surface:  #FFFFFF;
+      --blue:     #2979FF;
+      --blue-lt:  rgba(41,121,255,.10);
+      --blue-md:  rgba(41,121,255,.18);
+      --yellow:   #FFC107;
+      --yellow-lt:rgba(255,193,7,.12);
+      --green:    #00C853;
+      --green-lt: rgba(0,200,83,.10);
+      --txt:      #0D1117;
+      --sub:      #6B7280;
+      --border:   #E4E8EF;
+      --shadow:   0 2px 12px rgba(0,0,0,.07);
+      --shadow-md:0 6px 24px rgba(0,0,0,.10);
+      --shadow-lg:0 12px 40px rgba(0,0,0,.13);
+
+      /* premium dark (header + settings only) */
+      --dark:     #1A1F2E;
+      --dark-2:   #252B3B;
+      --y:        #FFC107;
+
+      --r:   16px;
+      --rsm: 10px;
+      --f:   'Poppins', sans-serif;
+      --ease:.18s cubic-bezier(.4,0,.2,1);
+      --hh:  58px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--f);
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: var(--f); cursor: pointer; border: none; background: none; outline: none; }
+
+    /* ══════════════════════════════════════════
+       HEADER  (premium dark — kept intentionally)
+    ══════════════════════════════════════════ */
+    .hdr {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      height: var(--hh);
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 2px solid var(--yellow);
+      box-shadow: 0 2px 20px rgba(0,0,0,.18);
+    }
+    .hdr-left { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 34px; height: 34px; border-radius: var(--rsm);
+      background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: var(--dark);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brand { font-size: 16px; font-weight: 800; color: var(--yellow); letter-spacing: 1.5px; }
+    .brand-sub { font-size: 8px; color: rgba(255,255,255,.32); letter-spacing: .4px; text-transform: uppercase; }
+    .hdr-right { display: flex; align-items: center; gap: 8px; }
+
+    .badge-int {
+      font-size: 9px; font-weight: 600;
+      background: rgba(255,193,7,.12);
+      border: 1px solid rgba(255,193,7,.28);
+      color: var(--yellow); padding: 3px 9px;
+      border-radius: 20px; letter-spacing: .3px;
+    }
+    .install-btn {
+      font-size: 10px; font-weight: 700;
+      background: rgba(255,193,7,.15);
+      border: 1px solid rgba(255,193,7,.4);
+      color: var(--yellow); padding: 5px 10px;
+      border-radius: var(--rsm); letter-spacing: .3px;
+      transition: var(--ease); text-transform: uppercase;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .install-btn:hover { background: var(--yellow); color: var(--dark); }
+    .install-btn svg { width: 12px; height: 12px; }
+    .settings-btn {
+      width: 34px; height: 34px;
+      background: rgba(255,255,255,.07);
+      border-radius: var(--rsm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: var(--ease);
+      border: .5px solid rgba(255,255,255,.10);
+    }
+    .settings-btn:hover { background: rgba(255,193,7,.15); border-color: rgba(255,193,7,.35); }
+
+    /* ══════════════════════════════════════════
+       PAGE LAYOUT
+    ══════════════════════════════════════════ */
+    .page { padding-top: calc(var(--hh) + 20px); padding-bottom: 60px; }
+    .wrap { max-width: 940px; margin: 0 auto; padding: 0 18px; }
+
+    /* ══════════════════════════════════════════
+       HERO STRIP — clean light version
+    ══════════════════════════════════════════ */
+    .hero-strip {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      border-radius: var(--r);
+      padding: 20px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,193,7,.18);
+      box-shadow: var(--shadow-md);
+      animation: fu .4s ease both;
+    }
+    .hero-title {
+      font-size: clamp(22px,4vw,30px); font-weight: 800;
+      color: #fff; letter-spacing: -.2px; line-height: 1;
+    }
+    .hero-title em { color: var(--yellow); font-style: normal; }
+    .hero-sub { font-size: 11px; color: rgba(255,255,255,.38); margin-top: 4px; font-weight: 400; }
+    .hero-right { display: flex; gap: 20px; flex-shrink: 0; }
+    .metric { text-align: right; }
+    .metric-val { font-size: 22px; font-weight: 700; color: var(--yellow); line-height: 1; }
+    .metric-val.w { color: #fff; }
+    .metric-lbl { font-size: 9px; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .3px; }
+
+    /* ══════════════════════════════════════════
+       SEARCH BAR
+    ══════════════════════════════════════════ */
+    .search-wrap {
+      position: relative; margin-bottom: 14px;
+      animation: fu .4s .05s ease both;
+    }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--sub); pointer-events: none; font-size: 16px;
+    }
+    .search-input {
+      width: 100%; height: 46px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0 16px 0 42px;
+      font-family: var(--f); font-size: 13px; font-weight: 500;
+      color: var(--txt);
+      transition: border-color var(--ease), box-shadow var(--ease);
+      box-shadow: var(--shadow);
+    }
+    .search-input::placeholder { color: #B0B7C3; }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-lt);
+    }
+
+    /* ══════════════════════════════════════════
+       TABS
+    ══════════════════════════════════════════ */
+    .tabs-wrap {
+      display: flex; gap: 6px; margin-bottom: 20px;
+      overflow-x: auto; padding-bottom: 2px;
+      scrollbar-width: none;
+      animation: fu .4s .08s ease both;
+    }
+    .tabs-wrap::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      font-size: 11px; font-weight: 700;
+      padding: 7px 16px; border-radius: 30px;
+      white-space: nowrap; transition: var(--ease);
+      letter-spacing: .3px; text-transform: uppercase;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--sub);
+    }
+    .tab-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .tab-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(41,121,255,.28);
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION HEADERS
+    ══════════════════════════════════════════ */
+    .section-hdr {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 12px; margin-top: 6px;
+    }
+    .section-hdr-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .sic-blue { background: var(--blue-lt); }
+    .sic-yellow { background: var(--yellow-lt); }
+    .sic-gray { background: rgba(107,114,128,.10); }
+    .section-hdr-info {}
+    .section-hdr-title {
+      font-size: 13px; font-weight: 800; color: var(--txt);
+      letter-spacing: .4px; text-transform: uppercase;
+    }
+    .section-hdr-sub { font-size: 10px; color: var(--sub); font-weight: 500; }
+
+    /* section wrapper for show/hide */
+    .tool-section { margin-bottom: 24px; }
+    .tool-section.hidden { display: none; }
+
+    /* ══════════════════════════════════════════
+       CORE TOOLS GRID — BIG cards (2 col)
+    ══════════════════════════════════════════ */
+    .grid-core {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media(max-width:640px) { .grid-core { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+    @media(max-width:360px) { .grid-core { grid-template-columns: 1fr; } }
+
+    /* ══════════════════════════════════════════
+       OTHER TOOLS GRID — smaller cards (3 col)
+    ══════════════════════════════════════════ */
+    .grid-ops {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media(max-width:580px) { .grid-ops { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+    @media(max-width:320px) { .grid-ops { grid-template-columns: 1fr; } }
+
+    /* ══════════════════════════════════════════
+       CORE CARD (.tc-core) — BIG
+    ══════════════════════════════════════════ */
+    .tc-core {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px 18px 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      position: relative; overflow: hidden;
+      transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+      cursor: pointer; user-select: none;
+      box-shadow: var(--shadow);
+    }
+    .tc-core::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--blue);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform var(--ease);
+    }
+    .tc-core:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--blue);
+    }
+    .tc-core:hover::after { transform: scaleX(1); }
+    .tc-core.disabled { opacity: .42; pointer-events: none; }
+
+    /* ══════════════════════════════════════════
+       SMALL CARD (.tc-sm) — OPS + UTILITY
+    ══════════════════════════════════════════ */
+    .tc-sm {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--rsm);
+      padding: 16px 14px 13px;
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative; overflow: hidden;
+      transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+      cursor: pointer; user-select: none;
+      box-shadow: var(--shadow);
+    }
+    .tc-sm::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--blue);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform var(--ease);
+    }
+    .tc-sm:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--blue);
+    }
+    .tc-sm:hover::after { transform: scaleX(1); }
+    .tc-sm.disabled { opacity: .42; pointer-events: none; }
+
+    /* click press */
+    .tc-core:active, .tc-sm:active { transform: scale(.97) !important; }
+
+    /* drag */
+    .tc-core.dragging, .tc-sm.dragging { opacity: .35; }
+    .tc-core.drag-over, .tc-sm.drag-over { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-lt); }
+
+    /* ══════════════════════════════════════════
+       CARD INTERNALS
+    ══════════════════════════════════════════ */
+    .tc-top { display: flex; align-items: flex-start; justify-content: space-between; }
+
+    /* icon bg variants */
+    .tc-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .tc-icon-sm {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .iy { background: var(--yellow-lt); }
+    .ib { background: var(--blue-lt); }
+    .ig { background: var(--green-lt); }
+    .io { background: rgba(249,115,22,.09); }
+    .ip { background: rgba(139,92,246,.09); }
+    .ir { background: rgba(239,68,68,.09); }
+
+    /* "Most Used" highlight tag */
+    .tag-most {
+      font-size: 8px; font-weight: 700; padding: 2px 7px;
+      border-radius: 20px; letter-spacing: .3px;
+      background: var(--yellow); color: #7A5000;
+      white-space: nowrap; margin-top: 2px;
+    }
+
+    /* status badges */
+    .badge { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 20px; letter-spacing: .2px; }
+    .bl { background: var(--green-lt); color: #00A040; }
+    .bb { background: var(--blue-lt); color: var(--blue); }
+    .bs { background: rgba(249,115,22,.09); color: #c2640a; }
+
+    .tc-name {
+      font-size: 14px; font-weight: 800; color: var(--txt);
+      line-height: 1.2;
+    }
+    .tc-name-sm {
+      font-size: 12px; font-weight: 700; color: var(--txt);
+      line-height: 1.2;
+    }
+    .tc-desc {
+      font-size: 10px; font-weight: 500; color: var(--sub);
+      line-height: 1.4; flex: 1;
+    }
+    .tc-foot { display: flex; align-items: center; justify-content: space-between; }
+    .open-btn {
+      font-size: 10px; font-weight: 700;
+      background: var(--blue); color: #fff;
+      padding: 6px 14px; border-radius: 8px;
+      letter-spacing: .3px; transition: var(--ease);
+      text-transform: uppercase; box-shadow: 0 2px 8px rgba(41,121,255,.25);
+    }
+    .open-btn:hover { background: #1565E0; box-shadow: 0 4px 12px rgba(41,121,255,.35); }
+    .open-btn-sm {
+      font-size: 9px; font-weight: 700;
+      background: var(--blue); color: #fff;
+      padding: 5px 11px; border-radius: 7px;
+      letter-spacing: .3px; transition: var(--ease);
+      text-transform: uppercase; box-shadow: 0 2px 6px rgba(41,121,255,.20);
+    }
+    .open-btn-sm:hover { background: #1565E0; }
+
+    /* no results message */
+    .no-results {
+      text-align: center; padding: 40px 20px;
+      font-size: 13px; color: var(--sub);
+      display: none;
+    }
+    .no-results.show { display: block; }
+
+    /* card stagger */
+    .tc-core:nth-child(1){animation:fu .35s .08s ease both}
+    .tc-core:nth-child(2){animation:fu .35s .13s ease both}
+    .tc-core:nth-child(3){animation:fu .35s .18s ease both}
+    .tc-sm:nth-child(1){animation:fu .35s .12s ease both}
+    .tc-sm:nth-child(2){animation:fu .35s .16s ease both}
+    .tc-sm:nth-child(3){animation:fu .35s .20s ease both}
+    .tc-sm:nth-child(4){animation:fu .35s .24s ease both}
+    .tc-sm:nth-child(5){animation:fu .35s .28s ease both}
+
+    /* ══════════════════════════════════════════
+       SETTINGS PANEL
+    ══════════════════════════════════════════ */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      z-index: 400; opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    .settings-panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(360px, 95vw);
+      background: var(--surface);
+      z-index: 500;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0,0,0,.15);
+    }
+    .settings-panel.open { transform: translateX(0); }
+
+    .sp-head {
+      background: var(--dark);
+      padding: 18px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid var(--yellow);
+      flex-shrink: 0;
+    }
+    .sp-title { font-size: 15px; font-weight: 700; color: var(--yellow); letter-spacing: .5px; }
+    .sp-close {
+      width: 30px; height: 30px;
+      background: rgba(255,255,255,.08);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.6); font-size: 16px; transition: var(--ease);
+    }
+    .sp-close:hover { background: rgba(255,193,7,.2); color: var(--yellow); }
+
+    .sp-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .sp-section-title {
+      font-size: 10px; font-weight: 700; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px;
+    }
+    .sp-item {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px; cursor: grab;
+      transition: var(--ease);
+    }
+    .sp-item:active { cursor: grabbing; }
+    .sp-item.dragging-sp { opacity: .3; }
+    .sp-item.drag-over-sp { border-color: var(--blue); background: var(--blue-lt); }
+    .sp-drag { color: #ccc; font-size: 14px; flex-shrink: 0; }
+    .sp-icon { font-size: 16px; flex-shrink: 0; }
+    .sp-name { font-size: 12px; font-weight: 600; color: var(--txt); flex: 1; }
+    .sp-status { font-size: 9px; font-weight: 600; color: var(--sub); }
+
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #D1D5DB; border-radius: 20px;
+      transition: var(--ease); cursor: pointer;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 14px; height: 14px;
+      background: #fff; border-radius: 50%;
+      transition: var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-track { background: var(--blue); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+    .sp-foot { padding: 14px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .sp-save {
+      width: 100%; background: var(--blue); color: #fff;
+      font-size: 13px; font-weight: 700;
+      padding: 12px; border-radius: 10px;
+      letter-spacing: .5px; transition: var(--ease);
+      text-transform: uppercase; box-shadow: 0 4px 14px rgba(41,121,255,.28);
+    }
+    .sp-save:hover { background: #1565E0; }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    .footer {
+      text-align: center; margin-top: 32px;
+      font-size: 10px; color: #bbb;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ══════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════ */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: var(--dark); color: var(--yellow);
+      font-size: 12px; font-weight: 600;
+      padding: 10px 22px; border-radius: 30px;
+      border: 1.5px solid rgba(255,193,7,.3);
+      z-index: 999; pointer-events: none; white-space: nowrap;
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ══════════════════════════════════════════
+       PWA BANNERS
+    ══════════════════════════════════════════ */
+    .install-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 998;
+      background: var(--dark);
+      border-top: 2px solid var(--yellow);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 -8px 32px rgba(0,0,0,.25);
+    }
+    .install-banner.show { transform: translateY(0); }
+    .install-banner-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--yellow); flex-shrink: 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: var(--dark);
+    }
+    .install-banner-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .install-banner-text { flex: 1; min-width: 0; }
+    .install-banner-title { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
+    .install-banner-sub { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 2px; }
+    .install-banner-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+    .btn-install-now {
+      background: var(--yellow); color: var(--dark);
+      font-size: 12px; font-weight: 700;
+      padding: 8px 16px; border-radius: 8px;
+      border: none; cursor: pointer; letter-spacing: .3px;
+      text-transform: uppercase; transition: var(--ease); white-space: nowrap;
+    }
+    .btn-install-now:hover { background: #E6AC00; }
+    .btn-install-now:active { transform: scale(.97); }
+    .btn-dismiss {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.5);
+      font-size: 18px; width: 32px; height: 32px;
+      border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--ease); flex-shrink: 0;
+    }
+    .btn-dismiss:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+    .update-banner {
+      position: fixed; top: calc(var(--hh) + 8px); left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      z-index: 998;
+      background: var(--dark-2);
+      border: 1.5px solid rgba(255,193,7,.4);
+      border-radius: 12px; padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+    }
+    .update-banner.show { transform: translateX(-50%) translateY(0); }
+    .update-banner-text { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.8); }
+    .btn-update {
+      background: var(--yellow); color: var(--dark);
+      font-size: 11px; font-weight: 700;
+      padding: 5px 12px; border-radius: 6px;
+      border: none; cursor: pointer; letter-spacing: .3px; transition: var(--ease);
+    }
+    .btn-update:hover { background: #E6AC00; }
+    .btn-update-dismiss {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.5);
+      font-size: 14px; width: 26px; height: 26px;
+      border-radius: 6px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--ease); flex-shrink: 0; padding: 0; font-family: var(--f);
+    }
+    .btn-update-dismiss:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+    /* ══════════════════════════════════════════
+       ANIMATIONS
+    ══════════════════════════════════════════ */
+    @keyframes fu {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    @media(max-width:400px) {
+      .install-banner { padding: 12px 14px; gap: 10px; }
+      .btn-install-now { padding: 7px 12px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────────────── -->
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="logo">
+      <img src="https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg" alt="" onerror="this.parentElement.textContent='AK'" />
+    </div>
+    <div>
+      <div class="brand">AMP KART</div>
+      <div class="brand-sub">Advanced Market Platform</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button id="installAppBtn" class="install-btn" style="display:none" title="Install App">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      App
+    </button>
+    <span class="badge-int">● Internal</span>
+    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
+  </div>
+</header>
+
+<!-- ── PAGE ──────────────────────────────────────────── -->
+<main class="page">
+  <div class="wrap">
+
+    <!-- HERO -->
+    <div class="hero-strip">
+      <div>
+        <div class="hero-title">TOOL <em>OS</em></div>
+        <div class="hero-sub">AMP KART Control Panel · All tools in one place</div>
+      </div>
+      <div class="hero-right">
+        <div class="metric">
+          <div class="metric-val" id="m-live">3</div>
+          <div class="metric-lbl">Live</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val w" id="m-total">8</div>
+          <div class="metric-lbl">Total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search tools…" autocomplete="off" />
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-wrap" id="tabsWrap">
+      <button class="tab-btn active" data-tab="all">All</button>
+      <button class="tab-btn" data-tab="core">🟦 Core</button>
+      <button class="tab-btn" data-tab="operations">🟨 Operations</button>
+      <button class="tab-btn" data-tab="utility">⚪ Utility</button>
+    </div>
+
+    <!-- NO RESULTS -->
+    <div class="no-results" id="noResults">😕 No tools found. Try a different search.</div>
+
+    <!-- ── SECTION: CORE BUSINESS TOOLS ── -->
+    <div class="tool-section" id="sec-core">
+      <div class="section-hdr">
+        <div class="section-hdr-icon sic-blue">🟦</div>
+        <div class="section-hdr-info">
+          <div class="section-hdr-title">Core Business Tools</div>
+          <div class="section-hdr-sub">Most used · Highest impact</div>
+        </div>
+      </div>
+      <div class="grid-core" id="gridCore"></div>
+    </div>
+
+    <!-- ── SECTION: OPERATIONS TOOLS ── -->
+    <div class="tool-section" id="sec-ops">
+      <div class="section-hdr">
+        <div class="section-hdr-icon sic-yellow">🟨</div>
+        <div class="section-hdr-info">
+          <div class="section-hdr-title">Operations Tools</div>
+          <div class="section-hdr-sub">Track · Manage · Report</div>
+        </div>
+      </div>
+      <div class="grid-ops" id="gridOps"></div>
+    </div>
+
+    <!-- ── SECTION: UTILITY TOOLS ── -->
+    <div class="tool-section" id="sec-util">
+      <div class="section-hdr">
+        <div class="section-hdr-icon sic-gray">⚙️</div>
+        <div class="section-hdr-info">
+          <div class="section-hdr-title">Utility Tools</div>
+          <div class="section-hdr-sub">Fast · Lightweight helpers</div>
+        </div>
+      </div>
+      <div class="grid-ops" id="gridUtil"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <strong style="color:var(--sub)">AMP KART INTERNAL SYSTEM</strong> &nbsp;·&nbsp; Tool OS v4.0 &nbsp;·&nbsp; © 2025
+</footer>
+
+<!-- SETTINGS -->
+<div class="overlay" id="overlay" onclick="closeSettings()"></div>
+<aside class="settings-panel" id="settingsPanel">
+  <div class="sp-head">
+    <span class="sp-title">⚙ SETTINGS</span>
+    <button class="sp-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-section-title">Reorder &amp; Manage Tools</div>
+    <div id="spList"></div>
+  </div>
+  <div class="sp-foot">
+    <button class="sp-save" onclick="saveSettings()">Save &amp; Apply</button>
+  </div>
+</aside>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PWA INSTALL BANNER -->
+<div class="install-banner" id="installBanner" role="dialog" aria-label="Install AMP KART app">
+  <div class="install-banner-icon">
+    <img src="https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg" alt="AMP KART" onerror="this.parentElement.textContent='AK'" />
+  </div>
+  <div class="install-banner-text">
+    <div class="install-banner-title">Install AMP KART</div>
+    <div class="install-banner-sub">Add to home screen for best experience</div>
+  </div>
+  <div class="install-banner-actions">
+    <button class="btn-install-now" id="bannerInstallBtn">Install</button>
+    <button class="btn-dismiss" id="bannerDismissBtn" aria-label="Dismiss">✕</button>
+  </div>
+</div>
+
+
+
+<!-- ── SCRIPT ─────────────────────────────────────────── -->
+<script>
+/* ══════════════════════════════════════════════════════
+   TOOL CONFIG
+   category: 'core' | 'operations' | 'utility'
+   mostUsed: true  →  shows highlight tag
+══════════════════════════════════════════════════════ */
+const TOOLS_DEFAULT = [
+ 
+  
+{
+    id:'products', category:'core', mostUsed:true,
+    name:'Profit Calculator',
+    desc:'Track profits & cost per product',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></g></svg>`,
+    ic:'ip', url:'profit.html', status:'live', enabled:true
+  },
+  {
+    id:'calculator', category:'core', mostUsed:true,
+    name:'Pricing Calculator',
+    desc:'Set prices, margins & selling rates',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></g></svg>`,
+    ic:'iy', url:'calculator.html', status:'live', enabled:true
+  },
+  
+  {
+    id:'profit', category:'core', mostUsed:false,
+    name:'Courier Calculator',
+    desc:'Estimate shipping & delivery costs',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></g></svg>`,
+    ic:'io', url:'eniva.html', status:'live', enabled:true
+  },
+
+ {
+    id: 'tree-view', category: 'core', mostUsed: false,
+    name: 'Tree View',
+    desc: 'View network and hierarchies',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M12 9v3M6 12h12M6 12v3M18 12v3"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M12 9v3M6 12h12M6 12v3M18 12v3"/></g></svg>`,
+    ic: 'iy', url: 'tree.html', status: 'live', enabled: true
+  },
+  {
+    id:'invoice', category:'operations', mostUsed:false,
+    name:'Invoice Builder',
+    desc:'Create & send invoices fast',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><path d="M10 9H8"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><path d="M10 9H8"/></g></svg>`,
+    ic:'ig', url:'invoice.html', status:'soon', enabled:true
+  },
+  {
+    id:'orders', category:'operations', mostUsed:false,
+    name:'Order Tracker',
+    desc:'Monitor & manage all orders',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></g></svg>`,
+    ic:'ib', url:'orders.html', status:'soon', enabled:true
+  },
+  {
+    id:'reports', category:'operations', mostUsed:false,
+    name:'Sales Reports',
+    desc:'View daily & monthly sales data',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><polyline points="2 12 6 12 9 3 15 21 18 12 22 12"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><polyline points="2 12 6 12 9 3 15 21 18 12 22 12"/></g></svg>`,
+    ic:'ir', url:'reports.html', status:'soon', enabled:true
+  },
+  {
+    id:'compressor', category:'utility', mostUsed:false,
+    name:'Image Compressor',
+    desc:'Reduce image size instantly',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/><rect x="8" y="8" width="8" height="8" rx="1"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/><rect x="8" y="8" width="8" height="8" rx="1"/></g></svg>`,
+    ic:'ib', url:'compressor.html', status:'live', enabled:true
+  },
+  {
+    id:'qr', category:'utility', mostUsed:false,
+    name:'QR Generator',
+    desc:'Generate QR codes for any link',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01"/></g></svg>`,
+    ic:'ig', url:'qr.html', status:'live', enabled:true
+  },
+  {
+    id:'compiled', category:'operations', mostUsed:false,
+    name:'Compiled Workspace',
+    desc:'Manage & view compiled operations',
+    icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,215,0,.1)"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></g><g stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></g></svg>`,
+    ic:'ip', url:'compiled.html', status:'live', enabled:true
+  }
+];
+
+const STORE_KEY = 'ampkart_tools_v6';
+
+const badgeMap = {
+  live: '<span class="badge bl">● Live</span>',
+  beta: '<span class="badge bb">⬡ Beta</span>',
+  soon: '<span class="badge bs">◌ Soon</span>',
+};
+
+/* ── CONFIG LOAD / SAVE ─────────────────────────────── */
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return TOOLS_DEFAULT.map(t => ({...t}));
+    const saved = JSON.parse(raw);
+    
+    let mergedTools = [];
+    
+    // 1. पहले पुराने सेव्ड टूल्स को उनके कस्टम आर्डर में रेंडर करें
+    saved.forEach(s => {
+      const def = TOOLS_DEFAULT.find(d => d.id === s.id);
+      if (def) mergedTools.push({ ...def, enabled: s.enabled });
+    });
+    
+    // 2. अगर कोड में कोई नया टूल ऐड हुआ है (जैसे 'compiled'), तो उसे डिटेक्ट करके लिस्ट में ऐड करें
+    TOOLS_DEFAULT.forEach(def => {
+      if (!saved.find(s => s.id === def.id)) {
+        mergedTools.push({ ...def });
+      }
+    });
+    
+    return mergedTools;
+  } catch { return TOOLS_DEFAULT.map(t => ({...t})); }
+}
+function saveConfig(tools) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(
+    tools.map(t => ({ id: t.id, enabled: t.enabled }))
+  ));
+}
+
+let tools = loadConfig();
+let activeTab = 'all';
+let searchQuery = '';
+
+/* ── RENDER ─────────────────────────────────────────── */
+function renderGrid() {
+  const gridCore = document.getElementById('gridCore');
+  const gridOps  = document.getElementById('gridOps');
+  const gridUtil = document.getElementById('gridUtil');
+  gridCore.innerHTML = '';
+  gridOps.innerHTML  = '';
+  gridUtil.innerHTML = '';
+
+  const q = searchQuery.trim().toLowerCase();
+
+  let anyVisible = false;
+
+  tools.forEach(t => {
+    if (!t.enabled) return;
+
+    // tab filter
+    if (activeTab === 'core'       && t.category !== 'core')       return;
+    if (activeTab === 'operations' && t.category !== 'operations') return;
+    if (activeTab === 'utility'    && t.category !== 'utility')    return;
+
+    // search filter
+    if (q && !t.name.toLowerCase().includes(q) && !(t.desc||'').toLowerCase().includes(q)) return;
+
+    anyVisible = true;
+    const isCore = t.category === 'core';
+    const div = document.createElement('div');
+    div.className = isCore ? 'tc-core' : 'tc-sm';
+    div.dataset.id = t.id;
+
+    if (isCore) {
+      div.innerHTML = `
+        <div class="tc-top">
+          <div class="tc-icon ${t.ic}">${t.icon}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            ${badgeMap[t.status]}
+            ${t.mostUsed ? '<span class="tag-most">★ Most Used</span>' : ''}
+          </div>
+        </div>
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-desc">${t.desc || ''}</div>
+        <div class="tc-foot">
+          <button class="open-btn" data-url="${t.url}" data-name="${t.name}" data-status="${t.status}">Open →</button>
+        </div>`;
+    } else {
+      div.innerHTML = `
+        <div class="tc-top">
+          <div class="tc-icon-sm ${t.ic}">${t.icon}</div>
+          ${badgeMap[t.status]}
+        </div>
+        <div class="tc-name-sm">${t.name}</div>
+        <div class="tc-desc">${t.desc || ''}</div>
+        <div class="tc-foot">
+          <button class="open-btn-sm" data-url="${t.url}" data-name="${t.name}" data-status="${t.status}">Open</button>
+        </div>`;
+    }
+
+    if (t.category === 'core')       gridCore.appendChild(div);
+    else if (t.category === 'operations') gridOps.appendChild(div);
+    else                              gridUtil.appendChild(div);
+  });
+
+  // show/hide sections
+  const secCore = document.getElementById('sec-core');
+  const secOps  = document.getElementById('sec-ops');
+  const secUtil = document.getElementById('sec-util');
+  secCore.classList.toggle('hidden', gridCore.children.length === 0);
+  secOps.classList.toggle('hidden',  gridOps.children.length  === 0);
+  secUtil.classList.toggle('hidden', gridUtil.children.length  === 0);
+
+  // no results
+  document.getElementById('noResults').classList.toggle('show', !anyVisible);
+
+  // click handlers
+  document.querySelectorAll('.open-btn, .open-btn-sm').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const { url, name, status } = btn.dataset;
+      if (status === 'soon') { showToast(`${name} — Coming Soon!`); return; }
+      window.location.href = url;
+    });
+  });
+  document.querySelectorAll('.tc-core, .tc-sm').forEach(card => {
+    card.addEventListener('click', () => card.querySelector('button')?.click());
+    card.addEventListener('pointerdown', function() {
+      this.style.transform = 'scale(.97)';
+      setTimeout(() => this.style.transform = '', 130);
+    });
+  });
+
+  // metrics
+  document.getElementById('m-live').textContent  = tools.filter(t => t.status === 'live' && t.enabled).length;
+  document.getElementById('m-total').textContent = tools.filter(t => t.enabled).length;
+}
+
+/* ── TABS ───────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    renderGrid();
+  });
+});
+
+/* ── SEARCH ─────────────────────────────────────────── */
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  // reset tab to all when searching
+  if (searchQuery) {
+    activeTab = 'all';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="all"]').classList.add('active');
+  }
+  renderGrid();
+});
+
+/* ── SETTINGS PANEL ─────────────────────────────────── */
+function openSettings() {
+  renderSpList();
+  document.getElementById('settingsPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSettings() {
+  document.getElementById('settingsPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderSpList() {
+  const list = document.getElementById('spList');
+  list.innerHTML = '';
+  tools.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'sp-item';
+    div.draggable = true;
+    div.dataset.id = t.id;
+    div.dataset.spIdx = i;
+    div.innerHTML = `
+      <span class="sp-drag">⠿</span>
+      <span class="sp-icon">${t.icon}</span>
+      <span class="sp-name">${t.name}</span>
+      <span class="sp-status">${t.status.toUpperCase()}</span>
+      <label class="toggle">
+        <input type="checkbox" ${t.enabled ? 'checked' : ''} data-id="${t.id}" />
+        <div class="toggle-track"></div>
+      </label>`;
+    list.appendChild(div);
+  });
+
+  let dragSrc = null;
+  list.querySelectorAll('.sp-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragSrc = item;
+      setTimeout(() => item.classList.add('dragging-sp'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging-sp');
+      list.querySelectorAll('.sp-item').forEach(i => i.classList.remove('drag-over-sp'));
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (item !== dragSrc) {
+        list.querySelectorAll('.sp-item').forEach(i => i.classList.remove('drag-over-sp'));
+        item.classList.add('drag-over-sp');
+      }
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (item === dragSrc) return;
+      item.classList.remove('drag-over-sp');
+      const fromI = tools.findIndex(t => t.id === dragSrc.dataset.id);
+      const toI   = tools.findIndex(t => t.id === item.dataset.id);
+      const [moved] = tools.splice(fromI, 1);
+      tools.splice(toI, 0, moved);
+      renderSpList();
+    });
+  });
+}
+
+function saveSettings() {
+  document.querySelectorAll('#spList .toggle input').forEach(inp => {
+    const t = tools.find(x => x.id === inp.dataset.id);
+    if (t) t.enabled = inp.checked;
+  });
+  saveConfig(tools);
+  renderGrid();
+  closeSettings();
+  showToast('Settings saved ✓');
+}
+
+/* ── TOAST ──────────────────────────────────────────── */
+let toastT;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  clearTimeout(toastT);
+  el.textContent = msg;
+  el.classList.add('show');
+  toastT = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── INIT ───────────────────────────────────────────── */
+renderGrid();
+
+/* ══════════════════════════════════════════════════════
+   PWA SYSTEM
+══════════════════════════════════════════════════════ */
+let swRegistration = null;
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' });
+      swRegistration.update().catch(() => {});
+      if (swRegistration.waiting) showUpdateBanner();
+      swRegistration.addEventListener('updatefound', () => {
+        const newSW = swRegistration.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) showUpdateBanner();
+        });
+      });
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) { refreshing = true; window.location.reload(); }
+      });
+    } catch (err) { console.warn('[PWA] SW failed:', err); }
+  });
+}
+
+const UPDATE_SHOWN_KEY = 'ampkart_update_shown';
+function showUpdateBanner() {
+  if (sessionStorage.getItem(UPDATE_SHOWN_KEY)) return;
+  const banner = document.getElementById('updateBanner');
+  if (banner) { sessionStorage.setItem(UPDATE_SHOWN_KEY, '1'); setTimeout(() => banner.classList.add('show'), 600); }
+}
+function hideUpdateBanner() { document.getElementById('updateBanner')?.classList.remove('show'); }
+document.getElementById('updateBtn')?.addEventListener('click', () => {
+  hideUpdateBanner();
+  if (swRegistration?.waiting) swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+});
+document.getElementById('updateDismissBtn')?.addEventListener('click', () => {
+  hideUpdateBanner();
+  sessionStorage.setItem(UPDATE_SHOWN_KEY, 'dismissed');
+});
+
+let deferredPrompt = null;
+const DISMISS_KEY = 'ampkart_install_dismissed_ts';
+function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function wasDismissedRecently() { const ts = localStorage.getItem(DISMISS_KEY); return ts && (Date.now() - parseInt(ts)) < 3*24*60*60*1000; }
+function shouldShowInstall() { return !isStandalone() && !wasDismissedRecently(); }
+function showInstallUI() {
+  if (!shouldShowInstall()) return;
+  document.getElementById('installAppBtn').style.display = 'flex';
+  setTimeout(() => document.getElementById('installBanner')?.classList.add('show'), 1200);
+}
+function hideInstallUI() {
+  document.getElementById('installAppBtn').style.display = 'none';
+  document.getElementById('installBanner')?.classList.remove('show');
+}
+async function triggerInstall() {
+  if (!deferredPrompt) return;
+  hideInstallUI();
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (outcome === 'accepted') showToast('Installing AMP KART… ✓');
+  else localStorage.setItem(DISMISS_KEY, Date.now().toString());
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e; showInstallUI();
+});
+document.getElementById('installAppBtn').addEventListener('click', triggerInstall);
+document.getElementById('bannerInstallBtn')?.addEventListener('click', triggerInstall);
+document.getElementById('bannerDismissBtn')?.addEventListener('click', () => {
+  hideInstallUI(); localStorage.setItem(DISMISS_KEY, Date.now().toString());
+});
+window.addEventListener('appinstalled', () => { hideInstallUI(); deferredPrompt = null; showToast('AMP KART installed! ✓'); });
+if (isStandalone()) hideInstallUI();
+</script>
+</body>
+</html>

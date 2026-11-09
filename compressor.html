@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMP Compressor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== AMP DESIGN TOKENS ===== */
+        :root {
+            --amp-black:    #0a0a0a;
+            --amp-dark:     #111111;
+            --amp-surface:  #1a1a1a;
+            --amp-border:   #2a2a2a;
+            --amp-yellow:   #FFD700;
+            --amp-yellow-d: #e6c200;
+            --amp-white:    #f5f5f5;
+            --amp-muted:    #888888;
+            --amp-success:  #22c55e;
+            --amp-danger:   #ef4444;
+            --radius:       10px;
+            --font-brand:   'Barlow', sans-serif;
+            --font-body:    'Inter', sans-serif;
+        }
+
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-body);
+            background: var(--amp-black);
+            color: var(--amp-white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--amp-border); border-radius: 4px; }
+
+        /* ===== HEADER ===== */
+        .amp-header {
+            background: var(--amp-dark);
+            border-bottom: 1px solid var(--amp-border);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+        .amp-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .amp-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--amp-yellow);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 14px;
+        }
+        .amp-logo h1 {
+            font-family: var(--font-brand);
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.3px;
+            color: var(--amp-white);
+        }
+        .amp-logo span {
+            color: var(--amp-yellow);
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 600;
+            border-radius: var(--radius);
+            transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .btn-primary {
+            background: var(--amp-yellow);
+            color: #000;
+            padding: 9px 18px;
+            font-size: 13px;
+        }
+        .btn-primary:hover { background: var(--amp-yellow-d); }
+
+        .btn-ghost {
+            background: var(--amp-surface);
+            color: var(--amp-white);
+            padding: 9px 14px;
+            font-size: 13px;
+            border: 1px solid var(--amp-border);
+        }
+        .btn-ghost:hover { border-color: var(--amp-yellow); color: var(--amp-yellow); }
+
+        .btn-danger-ghost {
+            background: transparent;
+            color: var(--amp-muted);
+            padding: 7px 12px;
+            font-size: 12px;
+            border: 1px solid var(--amp-border);
+        }
+        .btn-danger-ghost:hover { color: var(--amp-danger); border-color: var(--amp-danger); }
+
+        .btn-lg {
+            padding: 13px 20px;
+            font-size: 14px;
+            border-radius: 10px;
+            width: 100%;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .amp-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            gap: 14px;
+        }
+
+        /* ===== UPLOAD ZONE ===== */
+        #uploadZone {
+            border: 2px dashed var(--amp-border);
+            border-radius: 12px;
+            background: var(--amp-surface);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        #uploadZone:hover, #uploadZone.drag-over {
+            border-color: var(--amp-yellow);
+            background: rgba(255, 215, 0, 0.04);
+        }
+        #uploadZone .upload-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            color: var(--amp-yellow);
+            font-size: 22px;
+        }
+        #uploadZone h2 {
+            font-family: var(--font-brand);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        #uploadZone p {
+            font-size: 13px;
+            color: var(--amp-muted);
+            margin-bottom: 20px;
+        }
+
+        /* ===== SECTION LABEL ===== */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--amp-muted);
+        }
+
+        /* ===== WORKSPACE (shown after upload) ===== */
+        #workspace { display: none; flex-direction: column; gap: 14px; }
+        #workspace.active { display: flex; }
+
+        /* ===== PREVIEW BLOCK ===== */
+        .preview-block {
+            background: var(--amp-surface);
+            border: 1px solid var(--amp-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--amp-border);
+        }
+        .preview-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            max-height: 55vh;
+            overflow: hidden;
+            background: #0d0d0d;
+        }
+        #previewImg {
+            max-width: 100%;
+            max-height: 55vh;
+            object-fit: contain;
+            display: none;
+        }
+
+        /* Loader */
+        #loader {
+            position: absolute;
+            inset: 0;
+            background: rgba(10,10,10,0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        #loader.active { display: flex; }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--amp-border);
+            border-top-color: var(--amp-yellow);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--amp-yellow);
+        }
+
+        /* Compressed badge */
+        .compressed-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--amp-yellow);
+            color: #000;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: none;
+            z-index: 5;
+        }
+        .compressed-badge.visible { display: block; }
+
+        /* ===== STATS ROW ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background: var(--amp-border);
+        }
+        .stat-cell {
+            background: var(--amp-dark);
+            padding: 10px 14px;
+            text-align: center;
+        }
+        .stat-cell .stat-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--amp-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .stat-cell .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--amp-white);
+        }
+        .stat-cell.savings .stat-value {
+            color: var(--amp-success);
+            font-size: 18px;
+        }
+        .stat-cell.savings .stat-value.negative { color: var(--amp-danger); }
+
+        /* ===== PRESET BUTTONS ===== */
+        .preset-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .preset-btn {
+            background: var(--amp-surface);
+            border: 1px solid var(--amp-border);
+            border-radius: var(--radius);
+            padding: 10px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            font-family: var(--font-body);
+            color: var(--amp-white);
+        }
+        .preset-btn:hover { border-color: var(--amp-yellow); }
+        .preset-btn.active {
+            border-color: var(--amp-yellow);
+            background: rgba(255,215,0,0.08);
+        }
+        .preset-btn .preset-name {
+            font-size: 12px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .preset-btn .preset-desc {
+            font-size: 10px;
+            color: var(--amp-muted);
+            display: block;
+        }
+        .preset-btn .preset-icon {
+            font-size: 15px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .preset-btn.active .preset-name { color: var(--amp-yellow); }
+
+        /* ===== ADVANCED SLIDER ===== */
+        .slider-wrap { display: none; }
+        .slider-wrap.visible { display: block; }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 20px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--amp-yellow);
+            border: 2px solid #000;
+            box-shadow: 0 0 0 2px var(--amp-yellow);
+            margin-top: -7px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--amp-border);
+            border-radius: 2px;
+            background-image: linear-gradient(var(--amp-yellow), var(--amp-yellow));
+            background-size: var(--range-progress, 70%) 100%;
+            background-repeat: no-repeat;
+        }
+
+        /* ===== CONTROLS PANEL ===== */
+        .controls-panel {
+            background: var(--amp-surface);
+            border: 1px solid var(--amp-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .controls-section {
+            padding: 14px;
+            border-bottom: 1px solid var(--amp-border);
+        }
+        .controls-section:last-child { border-bottom: none; }
+        .controls-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .toggle-link {
+            font-size: 11px;
+            color: var(--amp-muted);
+            cursor: pointer;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            font-family: var(--font-body);
+        }
+        .toggle-link:hover { color: var(--amp-yellow); }
+
+        /* ===== QUEUE ===== */
+        .queue-section {
+            background: var(--amp-surface);
+            border: 1px solid var(--amp-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .queue-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--amp-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .queue-count-badge {
+            background: var(--amp-yellow);
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 7px;
+            border-radius: 20px;
+        }
+        .queue-scroll {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            overflow-x: auto;
+            min-height: 72px;
+            align-items: center;
+        }
+        .queue-thumb {
+            flex-shrink: 0;
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            border: 2px solid var(--amp-border);
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.15s, opacity 0.15s;
+            opacity: 0.55;
+        }
+        .queue-thumb:hover { opacity: 0.85; }
+        .queue-thumb.active {
+            border-color: var(--amp-yellow);
+            opacity: 1;
+        }
+        .queue-thumb .thumb-remove {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            background: var(--amp-danger);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .queue-thumb:hover .thumb-remove { display: flex; }
+
+        /* ===== ACTIONS FOOTER ===== */
+        .actions-footer {
+            background: var(--amp-dark);
+            border: 1px solid var(--amp-border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        #bulkStatus {
+            font-size: 11px;
+            color: var(--amp-yellow);
+            text-align: center;
+            min-height: 16px;
+            font-weight: 600;
+        }
+
+        /* ===== DRAG OVERLAY ===== */
+        .drag-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 215, 0, 0.1);
+            border: 3px solid var(--amp-yellow);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-brand);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--amp-yellow);
+            backdrop-filter: blur(4px);
+        }
+        .drag-overlay.active { display: flex; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--amp-muted);
+            font-size: 13px;
+            padding: 40px;
+        }
+        .empty-preview i { font-size: 32px; opacity: 0.3; }
+
+        /* ===== UTILITY ===== */
+        .hidden { display: none !important; }
+        .flex { display: flex !important; }
+    </style>
+</head>
+<body>
+
+<!-- Drag Overlay -->
+<div class="drag-overlay" id="dragOverlay">
+    <i class="fa-solid fa-bolt" style="margin-right:12px; font-size:24px;"></i> DROP TO COMPRESS
+</div>
+
+<!-- Hidden File Input -->
+<input type="file" id="fileInput" class="hidden" multiple accept="image/jpeg,image/png,image/webp">
+
+<!-- ===== HEADER ===== -->
+<header class="amp-header">
+    <div class="amp-logo">
+        <div class="amp-logo-icon"><i class="fa-solid fa-compress"></i></div>
+        <h1>AMP <span>Compressor</span></h1>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-danger-ghost hidden" id="resetBtn" onclick="resetApp()">
+            <i class="fa-solid fa-rotate-right"></i> Reset
+        </button>
+        <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-plus"></i> Add Images
+        </button>
+    </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="amp-main">
+
+    <!-- UPLOAD ZONE (initial state) -->
+    <div id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <h2>Upload Images</h2>
+        <p>JPG, PNG, WEBP — drag & drop or click to browse</p>
+        <button class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-folder-open"></i> Select Files
+        </button>
+    </div>
+
+    <!-- WORKSPACE (visible after upload) -->
+    <div id="workspace">
+
+        <!-- PREVIEW BLOCK -->
+        <div class="preview-block">
+            <div class="preview-header">
+                <span class="section-label">Preview</span>
+                <div style="display:flex; gap:6px;">
+                    <span id="currentFileName" class="section-label" style="color: var(--amp-muted);"></span>
+                    <button class="btn btn-icon btn-danger-ghost" id="removeImgBtn" onclick="removeCurrentImage()" title="Remove this image" style="display:none;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <div class="compressed-badge" id="compressedBadge">✓ COMPRESSED READY</div>
+                <div id="loader">
+                    <div class="spinner"></div>
+                    <span class="loader-text">OPTIMIZING…</span>
+                </div>
+                <img id="previewImg" alt="Preview">
+                <div class="empty-preview" id="emptyState">
+                    <i class="fa-regular fa-image"></i>
+                    <span>No image selected</span>
+                </div>
+            </div>
+
+            <!-- STATS ROW -->
+            <div class="stats-row" id="statsRow" style="display:none;">
+                <div class="stat-cell">
+                    <div class="stat-label">Original</div>
+                    <div class="stat-value" id="origSize">—</div>
+                </div>
+                <div class="stat-cell savings">
+                    <div class="stat-label">Saved</div>
+                    <div class="stat-value" id="savingsPct">—</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-label">Compressed</div>
+                    <div class="stat-value" id="compSize">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUEUE -->
+        <div class="queue-section">
+            <div class="queue-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="section-label">Queue</span>
+                    <span class="queue-count-badge" id="queueCount">0</span>
+                </div>
+                <button class="btn btn-danger-ghost" onclick="clearAll()" style="font-size:11px; padding:4px 10px;">
+                    <i class="fa-solid fa-trash-can"></i> Clear All
+                </button>
+            </div>
+            <div class="queue-scroll" id="queueBar"></div>
+        </div>
+
+        <!-- CONTROLS PANEL -->
+        <div class="controls-panel">
+            <!-- PRESETS -->
+            <div class="controls-section">
+                <div class="controls-section-header">
+                    <span class="section-label">Quality Preset</span>
+                    <button class="toggle-link" id="advancedToggle" onclick="toggleAdvanced()">Advanced</button>
+                </div>
+                <div class="preset-group">
+                    <button class="preset-btn" data-quality="22" onclick="selectPreset(this, 22)">
+                        <span class="preset-icon">⚡</span>
+                        <span class="preset-name">Fast</span>
+                        <span class="preset-desc">Smallest file</span>
+                    </button>
+                    <button class="preset-btn active" data-quality="55" onclick="selectPreset(this, 55)">
+                        <span class="preset-icon">⚖️</span>
+                        <span class="preset-name">Balanced</span>
+                        <span class="preset-desc">Recommended</span>
+                    </button>
+                    <button class="preset-btn" data-quality="85" onclick="selectPreset(this, 85)">
+                        <span class="preset-icon">💎</span>
+                        <span class="preset-name">High Quality</span>
+                        <span class="preset-desc">Best detail</span>
+                    </button>
+                </div>
+                <!-- ADVANCED SLIDER -->
+                <div class="slider-wrap" id="sliderWrap" style="margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span class="section-label">Fine-tune Quality</span>
+                        <span id="qualityDisplay" style="font-size:12px; font-weight:700; color:var(--amp-yellow);">55%</span>
+                    </div>
+                    <input type="range" id="qualitySlider" min="5" max="95" value="55" style="--range-progress:55%">
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span class="section-label">Smaller</span>
+                        <span class="section-label">Larger</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS FOOTER -->
+        <div class="actions-footer">
+            <button class="btn btn-primary btn-lg" id="quickCompressAllBtn" onclick="quickCompressAll()">
+                <i class="fa-solid fa-bolt"></i> Quick Compress All
+            </button>
+            <div class="action-row">
+                <button class="btn btn-ghost btn-lg" id="downloadSingleBtn" onclick="downloadSingle()">
+                    <i class="fa-solid fa-download"></i> Download This
+                </button>
+                <button class="btn btn-ghost btn-lg" id="downloadAllBtn" onclick="downloadAllImages()">
+                    <i class="fa-solid fa-images"></i> Download All
+                </button>
+            </div>
+            <p id="bulkStatus"></p>
+        </div>
+
+    </div><!-- /workspace -->
+</main>
+
+<script>
+    // =============================================
+    // AMP COMPRESSOR — Core Logic
+    // =============================================
+
+    // --- Configuration (easy to update) ---
+    const CONFIG = {
+        presetQualities: { fast: 0.22, balanced: 0.55, high: 0.85 },
+        defaultQuality: 0.55,
+        outputFormat: 'image/jpeg',
+        filenameSuffix: '-amp',
+        downloadDelay: 200, // ms between bulk downloads
+    };
+
+    // --- App State ---
+    const state = {
+        files: [],        // [{ id, file, compressedBlob }]
+        activeIndex: -1,
+        quality: CONFIG.defaultQuality,
+    };
+
+    // --- DOM References ---
+    const els = {
+        fileInput:          document.getElementById('fileInput'),
+        uploadZone:         document.getElementById('uploadZone'),
+        workspace:          document.getElementById('workspace'),
+        previewImg:         document.getElementById('previewImg'),
+        compressedBadge:    document.getElementById('compressedBadge'),
+        loader:             document.getElementById('loader'),
+        emptyState:         document.getElementById('emptyState'),
+        currentFileName:    document.getElementById('currentFileName'),
+        removeImgBtn:       document.getElementById('removeImgBtn'),
+        statsRow:           document.getElementById('statsRow'),
+        origSize:           document.getElementById('origSize'),
+        compSize:           document.getElementById('compSize'),
+        savingsPct:         document.getElementById('savingsPct'),
+        queueBar:           document.getElementById('queueBar'),
+        queueCount:         document.getElementById('queueCount'),
+        slider:             document.getElementById('qualitySlider'),
+        qualityDisplay:     document.getElementById('qualityDisplay'),
+        sliderWrap:         document.getElementById('sliderWrap'),
+        advancedToggle:     document.getElementById('advancedToggle'),
+        resetBtn:           document.getElementById('resetBtn'),
+        bulkStatus:         document.getElementById('bulkStatus'),
+        btnSingle:          document.getElementById('downloadSingleBtn'),
+        btnAll:             document.getElementById('downloadAllBtn'),
+        quickCompressBtn:   document.getElementById('quickCompressAllBtn'),
+        dragOverlay:        document.getElementById('dragOverlay'),
+    };
+
+    // =============================================
+    // EVENT LISTENERS
+    // =============================================
+
+    els.fileInput.addEventListener('change', (e) => {
+        if (e.target.files?.length) {
+            handleFiles(Array.from(e.target.files));
+            els.fileInput.value = '';
+        }
+    });
+
+    els.slider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        e.target.style.setProperty('--range-progress', val + '%');
+        els.qualityDisplay.textContent = val + '%';
+        state.quality = val / 100;
+        // Deactivate presets since user customized
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    });
+
+    els.slider.addEventListener('change', () => {
+        if (state.activeIndex !== -1) compressCurrent();
+    });
+
+    // Drag & Drop
+    let dragCounter = 0;
+    window.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragCounter++;
+        els.dragOverlay.classList.add('active');
+    });
+    window.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0) els.dragOverlay.classList.remove('active');
+    });
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => {
+        e.preventDefault();
+        els.dragOverlay.classList.remove('active');
+        dragCounter = 0;
+        if (e.dataTransfer.files?.length) handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    // =============================================
+    // CORE FUNCTIONS
+    // =============================================
+
+    function handleFiles(newFiles) {
+        const valid = newFiles.filter(f => f.type.startsWith('image/'));
+        if (!valid.length) { alert('Please select JPG, PNG, or WEBP images.'); return; }
+
+        const processed = valid.map(f => ({
+            id: Math.random().toString(36).slice(2, 10),
+            file: f,
+            compressedBlob: null,
+        }));
+
+        state.files = [...state.files, ...processed];
+        showWorkspace();
+        renderQueue();
+
+        const startIndex = state.activeIndex === -1 ? 0 : state.files.length - processed.length;
+        selectImage(startIndex);
+    }
+
+    function showWorkspace() {
+        els.uploadZone.classList.add('hidden');
+        els.workspace.classList.add('active');
+        els.resetBtn.classList.remove('hidden');
+    }
+
+    function resetApp() {
+        state.files = [];
+        state.activeIndex = -1;
+        els.uploadZone.classList.remove('hidden');
+        els.workspace.classList.remove('active');
+        els.resetBtn.classList.add('hidden');
+        els.previewImg.style.display = 'none';
+        els.emptyState.style.display = '';
+        els.compressedBadge.classList.remove('visible');
+        els.statsRow.style.display = 'none';
+        els.removeImgBtn.style.display = 'none';
+        els.currentFileName.textContent = '';
+        els.bulkStatus.textContent = '';
+        renderQueue();
+    }
+
+    function renderQueue() {
+        els.queueBar.innerHTML = '';
+        els.queueCount.textContent = state.files.length;
+
+        state.files.forEach((item, idx) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'queue-thumb' + (idx === state.activeIndex ? ' active' : '');
+            thumb.style.backgroundImage = `url(${URL.createObjectURL(item.file)})`;
+            thumb.title = item.file.name;
+
+            // Remove button inside thumb
+            const rm = document.createElement('span');
+            rm.className = 'thumb-remove';
+            rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            rm.onclick = (e) => { e.stopPropagation(); removeImage(idx); };
+            thumb.appendChild(rm);
+
+            thumb.onclick = () => selectImage(idx);
+            els.queueBar.appendChild(thumb);
+        });
+    }
+
+    function selectImage(index) {
+        if (index < 0 || index >= state.files.length) return;
+        state.activeIndex = index;
+        renderQueue();
+        compressCurrent();
+    }
+
+    function removeCurrentImage() { removeImage(state.activeIndex); }
+    function clearAll() { resetApp(); }
+
+    function removeImage(index) {
+        state.files.splice(index, 1);
+        if (!state.files.length) { resetApp(); return; }
+
+        if (index === state.activeIndex) {
+            state.activeIndex = Math.max(0, index - 1);
+        } else if (index < state.activeIndex) {
+            state.activeIndex--;
+        }
+        renderQueue();
+        selectImage(state.activeIndex);
+    }
+
+    async function compressCurrent() {
+        if (state.activeIndex === -1) return;
+        const item = state.files[state.activeIndex];
+
+        // Show loader
+        els.loader.classList.add('active');
+        els.compressedBadge.classList.remove('visible');
+        els.statsRow.style.display = 'none';
+        els.removeImgBtn.style.display = 'none';
+        els.currentFileName.textContent = truncateName(item.file.name);
+
+        await tick();
+
+        try {
+            const blob = await processImageToBlob(item.file, state.quality);
+            state.files[state.activeIndex].compressedBlob = blob;
+
+            const url = URL.createObjectURL(blob);
+            els.previewImg.src = url;
+            els.previewImg.style.display = 'block';
+            els.emptyState.style.display = 'none';
+            els.compressedBadge.classList.add('visible');
+            els.removeImgBtn.style.display = 'flex';
+
+            // Stats
+            const origBytes = item.file.size;
+            const compBytes = blob.size;
+            const savings = ((origBytes - compBytes) / origBytes) * 100;
+
+            els.origSize.textContent = formatBytes(origBytes);
+            els.compSize.textContent = formatBytes(compBytes);
+            els.savingsPct.textContent = (savings > 0 ? '-' : '+') + Math.abs(Math.round(savings)) + '%';
+            els.savingsPct.className = 'stat-value' + (savings <= 0 ? ' negative' : '');
+            els.statsRow.style.display = '';
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            els.loader.classList.remove('active');
+        }
+    }
+
+    // =============================================
+    // PRESET & QUALITY CONTROL
+    // =============================================
+
+    function selectPreset(btn, qualityPct) {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.quality = qualityPct / 100;
+        // Sync slider
+        els.slider.value = qualityPct;
+        els.slider.style.setProperty('--range-progress', qualityPct + '%');
+        els.qualityDisplay.textContent = qualityPct + '%';
+        if (state.activeIndex !== -1) compressCurrent();
+    }
+
+    function toggleAdvanced() {
+        const wrap = els.sliderWrap;
+        const visible = wrap.classList.toggle('visible');
+        els.advancedToggle.textContent = visible ? 'Hide' : 'Advanced';
+    }
+
+    // =============================================
+    // IMAGE PROCESSING
+    // =============================================
+
+    function processImageToBlob(file, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob((blob) => {
+                        blob ? resolve(blob) : reject(new Error('Blob conversion failed'));
+                    }, CONFIG.outputFormat, quality);
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // =============================================
+    // DOWNLOADS
+    // =============================================
+
+    function buildOutputName(originalName) {
+        // Format: product-name-amp.jpg
+        const base = originalName.replace(/\.[^.]+$/, '').replace(/\s+/g, '-').toLowerCase();
+        return `${base}${CONFIG.filenameSuffix}.jpg`;
+    }
+
+    function downloadSingle() {
+        if (state.activeIndex === -1) return;
+        const item = state.files[state.activeIndex];
+        if (!item.compressedBlob) return;
+        triggerDownload(item.compressedBlob, buildOutputName(item.file.name));
+    }
+
+    async function quickCompressAll() {
+        if (!state.files.length) return;
+        const btn = els.quickCompressBtn;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Compressing…';
+        els.bulkStatus.textContent = 'Compressing all images…';
+
+        try {
+            for (let i = 0; i < state.files.length; i++) {
+                els.bulkStatus.textContent = `Processing ${i + 1} / ${state.files.length}…`;
+                const blob = await processImageToBlob(state.files[i].file, state.quality);
+                state.files[i].compressedBlob = blob;
+                await tick();
+            }
+            // Refresh current preview
+            if (state.activeIndex !== -1) compressCurrent();
+            els.bulkStatus.textContent = `✓ All ${state.files.length} images ready`;
+        } catch (err) {
+            console.error(err);
+            els.bulkStatus.textContent = 'Error during compression.';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Quick Compress All';
+            setTimeout(() => { els.bulkStatus.textContent = ''; }, 3000);
+        }
+    }
+
+    async function downloadAllImages() {
+        if (!state.files.length) return;
+        const btn = els.btnAll;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Downloading…';
+        els.bulkStatus.textContent = 'Allow multiple downloads if prompted';
+
+        try {
+            let count = 0;
+            for (const item of state.files) {
+                const blob = item.compressedBlob || await processImageToBlob(item.file, state.quality);
+                triggerDownload(blob, buildOutputName(item.file.name));
+                count++;
+                els.bulkStatus.textContent = `Downloaded ${count} / ${state.files.length}`;
+                await sleep(CONFIG.downloadDelay);
+            }
+            els.bulkStatus.textContent = `✓ ${count} files downloaded`;
+        } catch (err) {
+            console.error(err);
+            els.bulkStatus.textContent = 'Error during download.';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-images"></i> Download All';
+            setTimeout(() => { els.bulkStatus.textContent = ''; }, 3000);
+        }
+    }
+
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    // =============================================
+    // UTILITIES
+    // =============================================
+
+    function formatBytes(bytes) {
+        if (!bytes) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function truncateName(name, max = 22) {
+        return name.length > max ? name.slice(0, max - 1) + '…' : name;
+    }
+
+    const tick = () => new Promise(r => setTimeout(r, 20));
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+</script>
+</body>
+</html>

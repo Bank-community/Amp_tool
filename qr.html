@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GiftoraX — Premium QR Studio</title>
+
+  <!-- Fonts: Cormorant Garamond (luxury display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Libraries -->
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
+<style>
+    /* ═══════════════════════════════════════════════════════════
+       DESIGN TOKENS — AMP KART Premium Dark Theme
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      --bg:          #0f0f0f;
+      --bg-2:        #1a1a1a;
+      --bg-3:        #222222;
+      --bg-4:        #2a2a2a;
+      --surface:     #1a1a1a;
+      --surface-2:   #222222;
+      --surface-3:   #2a2a2a;
+      --border:      rgba(255, 215, 0, 0.2);
+      --border-2:    rgba(255, 215, 0, 0.4);
+      --border-3:    rgba(255, 215, 0, 0.8);
+      --gold:        #FFD700;
+      --gold-light:  #FFE866;
+      --gold-dark:   #CCAC00;
+      --gold-glow:   rgba(255, 215, 0, 0.15);
+      --gold-glow-2: rgba(255, 215, 0, 0.25);
+      --text:        #ffffff;
+      --text-2:      #cccccc;
+      --text-3:      #999999;
+      --error:       #ff6b6b; /* Muted red for errors only */
+      --success:     #FFD700; /* Replaced green with gold per requirements */
+      --warn:        #FFD700;
+      --r:           8px;     /* Buttons & Inputs */
+      --r-sm:        6px;
+      --r-lg:        12px;    /* Cards */
+      --r-xl:        16px;
+      --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle texture and glow */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px;
+      pointer-events: none; z-index: 0; opacity: 0.3;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(255, 215, 0, 0.03) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 80% 80%, rgba(255, 215, 0, 0.02) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TYPOGRAPHY
+    ═══════════════════════════════════════════════════════════ */
+    .font-display { font-family: 'Cormorant Garamond', serif; }
+    .text-gold { color: var(--gold); }
+    .text-gold-light { color: var(--gold-light); }
+    .text-muted { color: var(--text-2); }
+    .text-subtle { color: var(--text-3); }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 14px; height: 1px;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════════════════════ */
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── HEADER ─── */
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15, 15, 15, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 38px; height: 38px;
+      border-radius: var(--r-sm);
+      background: #000000;
+      border: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .logo-mark span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px; font-weight: 700;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+
+    .header-brand-sub {
+      font-size: 9.5px; font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      line-height: 1;
+      margin-top: 3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Live badge (Replaced Green with Gold) */
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(255, 215, 0, 0.08);
+      border: 1px solid var(--border-2);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: blink 1.6s ease infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+
+    /* ─── MAIN GRID ─── */
+    .app-main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      max-width: 1320px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px 16px 48px;
+    }
+
+    @media (min-width: 1024px) {
+      .app-main {
+        grid-template-columns: 480px 1fr;
+        gap: 32px;
+        padding: 32px 32px 64px;
+        align-items: start;
+      }
+    }
+
+    /* ─── CONTROLS PANEL ─── */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ─── PREVIEW PANEL ─── */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      order: -1; 
+    }
+
+    @media (min-width: 1024px) {
+      .preview-panel {
+        order: 0;
+        position: sticky;
+        top: 88px;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CARDS / CONTAINERS
+    ═══════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card:hover { 
+      border-color: var(--border-2); 
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px var(--gold-glow);
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       URL INPUT SECTION
+    ═══════════════════════════════════════════════════════════ */
+    .url-input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      pointer-events: none;
+      transition: color var(--transition);
+    }
+
+    .input-status {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-3);
+      transition: background var(--transition);
+    }
+
+    /* Removed bright green/red from status indicators */
+    .input-status.valid   { background: var(--gold); box-shadow: 0 0 8px var(--gold-glow-2); }
+    .input-status.invalid { background: var(--error); box-shadow: 0 0 8px rgba(255, 107, 107, 0.3); }
+
+    .url-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: var(--r);
+      padding: 12px 42px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 400;
+      outline: none;
+      transition: all var(--transition);
+      caret-color: var(--gold);
+    }
+
+    .url-input::placeholder { color: var(--text-3); }
+
+    .url-input:focus {
+      border-color: var(--gold);
+      background: var(--surface-2);
+      box-shadow: 0 0 0 2px var(--gold-glow), 0 0 15px var(--gold-glow);
+    }
+
+    .url-input.valid   { border-color: var(--border-2); }
+    .url-input.invalid { border-color: rgba(255, 107, 107, 0.4); }
+
+    .url-error {
+      font-size: 11.5px; font-weight: 500;
+      color: var(--error);
+      padding: 6px 4px 0;
+      display: none;
+      animation: fadeUp 0.25s ease;
+    }
+    .url-error.show { display: block; }
+
+    /* ─── BUTTONS ─── */
+    .btn-generate {
+      background: var(--gold);
+      color: #000000;
+      border: none;
+      border-radius: var(--r);
+      padding: 12px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .btn-generate:hover { 
+      transform: translateY(-1px); 
+      background: var(--gold-dark);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); 
+    }
+    .btn-generate:active { transform: scale(0.96); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ─── URL HISTORY ─── */
+    .url-history { margin-top: 14px; display: none; }
+    .url-history.show { display: block; }
+
+    .history-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+
+    .history-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .history-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+      overflow: hidden;
+    }
+
+    .history-item:hover {
+      background: var(--surface-2);
+      border-color: var(--border-2);
+      transform: translateX(3px);
+    }
+
+    .history-item svg { flex-shrink: 0; color: var(--text-3); }
+
+    .history-item span {
+      font-size: 12px; font-weight: 400;
+      color: var(--text-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .history-item:hover span { color: var(--text); }
+
+    /* ═══════════════════════════════════════════════════════════
+       TAB SYSTEM
+    ═══════════════════════════════════════════════════════════ */
+    .tabs-card { padding: 0; overflow: visible; }
+
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 16px 18px;
+      background: none; border: none;
+      color: var(--text-3);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px; font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      transition: color var(--transition);
+      flex-shrink: 0;
+    }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 18px; right: 18px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px 2px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-btn:hover { color: var(--text-2); }
+    .tab-btn.active { color: var(--gold); }
+    .tab-btn.active::after { transform: scaleX(1); }
+
+    .tab-btn svg { transition: color var(--transition); }
+    .tab-btn.active svg { color: var(--gold); }
+
+    .tabs-body { padding: 22px; }
+
+    .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+    .tab-pane.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── OPTIONS GRID ─── */
+    .options-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    }
+
+    .option-card {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 12px 8px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+
+    .option-card:hover {
+      background: var(--surface-2);
+      border-color: var(--border-2);
+      transform: translateY(-2px);
+    }
+
+    .option-card.active {
+      background: var(--gold-glow);
+      border-color: var(--gold);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .option-card.active::before {
+      content: '';
+      position: absolute; top: 5px; right: 5px;
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .option-preview {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .option-preview svg {
+      width: 38px; height: 38px;
+      fill: var(--text-3);
+      transition: fill var(--transition);
+    }
+
+    .option-card.active .option-preview svg { fill: var(--gold); }
+    .option-card:hover .option-preview svg  { fill: var(--text-2); }
+
+    .option-label {
+      font-size: 10px; font-weight: 500;
+      color: var(--text-3);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    .option-card.active .option-label { color: var(--gold); }
+    .option-card:hover .option-label  { color: var(--text-2); }
+
+    .pane-section-label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 10px;
+      margin-top: 18px;
+    }
+    .pane-section-label:first-child { margin-top: 0; }
+
+    /* ═══════════════════════════════════════════════════════════
+       LOGO PANEL
+    ═══════════════════════════════════════════════════════════ */
+    .logo-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .logo-option-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      padding: 16px 12px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--text-2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 500;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+
+    .logo-option-btn:hover {
+      background: var(--surface-2);
+      border-color: var(--border-2);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+
+    .logo-option-btn.active {
+      background: var(--gold-glow);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .logo-option-btn.danger:hover {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: var(--error);
+      background: rgba(255, 107, 107, 0.05);
+    }
+
+    .logo-option-btn input[type="file"] { display: none; }
+
+    .logo-upload-preview {
+      margin-top: 14px; padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: none; align-items: center; gap: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+    .logo-upload-preview.show { display: flex; }
+
+    .logo-thumb {
+      width: 46px; height: 46px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border-2);
+      flex-shrink: 0;
+      background: var(--bg-3);
+    }
+
+    .logo-thumb-info { flex: 1; min-width: 0; }
+    .logo-thumb-info strong { font-size: 12px; font-weight: 600; color: var(--text); display: block; }
+    .logo-thumb-info span  { font-size: 11px; color: var(--text-3); }
+
+    .logo-colors-btn {
+      padding: 6px 12px;
+      background: var(--gold);
+      border: none;
+      border-radius: var(--r-sm);
+      color: #000000;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--transition);
+    }
+    .logo-colors-btn:hover { background: var(--gold-dark); transform: scale(1.02); }
+
+    /* ═══════════════════════════════════════════════════════════
+       COLOR PANEL
+    ═══════════════════════════════════════════════════════════ */
+    .color-rows { display: flex; flex-direction: column; gap: 14px; }
+    .color-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .color-row-info { flex: 1; }
+    .color-row-label { font-size: 13px; font-weight: 500; color: var(--text); }
+    .color-row-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .color-picker-swatch {
+      position: relative;
+      width: 42px; height: 42px;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      border: 2px solid var(--border-2);
+      transition: all var(--transition);
+      overflow: hidden; flex-shrink: 0;
+    }
+
+    .color-picker-swatch:hover {
+      border-color: var(--gold);
+      transform: scale(1.08);
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+
+    .color-picker-swatch input[type="color"] {
+      position: absolute; inset: -4px;
+      opacity: 0; cursor: pointer;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+    }
+
+    .color-hex-display {
+      font-size: 11.5px; font-weight: 500;
+      color: var(--text-3);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.04em;
+      margin-top: 4px; text-align: center; width: 42px;
+    }
+
+    .color-picker-group { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
+
+    /* Removed bright greens/reds for contrast indicator */
+    .contrast-indicator {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 12px;
+      border-radius: var(--r-sm);
+      font-size: 11.5px; font-weight: 500;
+      margin-top: 16px;
+      transition: all var(--transition);
+    }
+
+    .contrast-indicator.good {
+      background: var(--gold-glow);
+      border: 1px solid var(--border-2);
+      color: var(--gold);
+    }
+
+    .contrast-indicator.warn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-2);
+    }
+
+    .contrast-indicator.bad {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      color: var(--error);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       QR PREVIEW — LUXURY SHOWCASE
+    ═══════════════════════════════════════════════════════════ */
+    .qr-showcase {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+    }
+
+    .qr-ambient {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%; height: 80%;
+      background: radial-gradient(circle, var(--gold-glow-2) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      animation: ambientPulse 5s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+
+    @keyframes ambientPulse {
+      from { opacity: 0.5; transform: translate(-50%, -50%) scale(0.92); }
+      to   { opacity: 0.8; transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    .qr-outer-frame {
+      position: relative; padding: 3px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px var(--gold-glow);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .qr-outer-frame:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 30px var(--gold-glow-2);
+    }
+
+    .qr-inner-surface {
+      background: #ffffff; /* Must remain white for scan clarity */
+      border-radius: 18px;
+      padding: 12px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Corner accents inside the white frame */
+    .qr-corner-mark {
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: #000000;
+      border-style: solid;
+      opacity: 0.15;
+    }
+    .qr-corner-mark.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+    .qr-corner-mark.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+    .qr-corner-mark.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+    .qr-corner-mark.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+    #qr-preview {
+      position: relative; width: 100%; aspect-ratio: 1/1;
+      border-radius: 12px; overflow: hidden;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+    }
+
+    #qr-preview canvas { max-width: 100%; height: auto !important; border-radius: 8px; display: block; }
+
+    .qr-overlay {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(4px);
+      border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 20;
+    }
+
+    .qr-overlay.visible { opacity: 1; pointer-events: all; }
+
+    .ring-spinner {
+      width: 36px; height: 36px;
+      border: 2.5px solid rgba(0, 0, 0, 0.1);
+      border-top: 2.5px solid #000000;
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .qr-overlay span {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: #333;
+    }
+
+    #qr-preview.fading { opacity: 0; transform: scale(0.97); transition: opacity 0.2s ease, transform 0.25s ease; }
+    #qr-preview.showing { transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    .qr-info-row { margin-top: 14px; text-align: center; width: 100%; }
+    .qr-current-url {
+      font-size: 12px; color: var(--text-3); font-weight: 400;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display: block;
+    }
+
+    .scan-test {
+      margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 16px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 100px;
+      font-size: 11px; font-weight: 500; color: var(--text-3);
+    }
+    .scan-test svg { color: var(--gold); opacity: 0.9; }
+
+    /* ═══════════════════════════════════════════════════════════
+       DOWNLOAD SECTION
+    ═══════════════════════════════════════════════════════════ */
+    .download-card { padding: 18px; }
+    .download-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    
+    .res-select {
+      background: #0f0f0f; color: #fff;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; outline: none;
+    }
+    .res-select option { background: #1a1a1a; color: #ffffff; }
+
+    .download-buttons { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 8px; }
+
+    .btn-download {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 12px; border-radius: var(--r);
+      font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: all var(--transition);
+      border: 1px solid var(--border);
+      background: var(--bg); color: var(--text-2);
+      position: relative; overflow: hidden;
+    }
+
+    .btn-download:hover {
+      background: var(--surface-2); border-color: var(--gold);
+      color: var(--gold); transform: translateY(-1px);
+    }
+    .btn-download:active { transform: scale(0.96); }
+    .btn-download:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-download.primary {
+      background: var(--gold);
+      border-color: transparent;
+      color: #000000;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+    }
+    .btn-download.primary:hover {
+      background: var(--gold-dark);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+      color: #000000; transform: translateY(-2px);
+    }
+
+    .btn-download .loader {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0, 0, 0, 0.3); border-top-color: #000000;
+      border-radius: 50%; animation: spin 0.8s linear infinite; display: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESET BUTTON
+    ═══════════════════════════════════════════════════════════ */
+    .btn-reset {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 100px;
+      color: var(--text-3); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all var(--transition);
+    }
+    .btn-reset:hover {
+      background: var(--surface-2); border-color: var(--gold); color: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+    ═══════════════════════════════════════════════════════════ */
+    #toast {
+      position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%);
+      background: var(--surface);
+      color: var(--text); padding: 12px 22px; border-radius: 100px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border: 1px solid var(--gold);
+      transition: bottom 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000; display: flex; align-items: center; gap: 10px;
+      white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+    }
+    #toast.show { bottom: 32px; }
+    #toast .toast-icon { flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════════
+       DIVIDER & SCROLLBAR
+    ═══════════════════════════════════════════════════════════ */
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, var(--border-2), transparent);
+      margin: 14px 0;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, 0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 215, 0, 0.4); }
+
+    /* ═══════════════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════════════ */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .reveal { animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+    .delay-1 { animation-delay: 0.06s; }
+    .delay-2 { animation-delay: 0.12s; }
+    .delay-3 { animation-delay: 0.18s; }
+    .delay-4 { animation-delay: 0.24s; }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 1023px) {
+      .app-main { padding: 20px 14px 60px; gap: 14px; }
+      .qr-outer-frame { width: 100%; max-width: 340px; }
+      .options-grid { grid-template-columns: repeat(5, 1fr); }
+      .download-buttons { grid-template-columns: 1fr 1fr; }
+      .btn-download.primary { grid-column: 1 / -1; }
+    }
+    @media (max-width: 400px) {
+      .options-grid { grid-template-columns: repeat(3, 1fr); }
+      .tab-btn { padding: 14px 12px; font-size: 11.5px; }
+    }
+    #qr-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 40px 20px; opacity: 0.4;
+    }
+    #qr-empty svg { color: var(--gold); }
+    #qr-empty p { font-size: 13px; color: var(--text-3); }
+</style>
+
+</head>
+
+<body>
+<div class="app-wrapper">
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║  HEADER                                  ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <header class="app-header">
+    <div class="header-logo">
+            <div class="logo-mark" style="padding: 0; overflow: hidden;">
+        <img src="Photo/logo.png" alt="AMP" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.innerHTML='<span>AMP</span>'">
+      </div>
+
+      <div>
+        <div class="header-brand-name gold-gradient-text">AMP KART</div>
+      
+      
+    </div>
+
+    <div class="header-actions">
+      <span class="badge-live">Live Preview</span>
+      <button class="btn-reset" id="resetBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║  MAIN LAYOUT                             ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <main class="app-main">
+
+    <!-- ┌──────────────────────────────────────────┐ -->
+    <!-- │  LEFT: CONTROLS PANEL                    │ -->
+    <!-- └──────────────────────────────────────────┘ -->
+    <div class="controls-panel">
+
+      <!-- ── URL INPUT ── -->
+      <div class="card url-section reveal">
+        <div class="section-eyebrow">Destination</div>
+        <div class="card-title" style="margin-top:8px;">Your Link</div>
+
+        <div class="url-input-row">
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <input
+              type="url"
+              id="urlInput"
+              class="url-input"
+              placeholder="https://yourwebsite.com"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <span class="input-status" id="urlStatus"></span>
+          </div>
+          <button class="btn-generate" id="generateBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="generateBtnText">Generate</span>
+          </button>
+        </div>
+
+        <div class="url-error" id="urlError">⚠ URL must start with http:// or https://</div>
+
+        <!-- History -->
+        <div class="url-history" id="urlHistory">
+          <div class="divider"></div>
+          <div class="history-label">Recent</div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </div>
+
+      <!-- ── CUSTOMIZATION TABS ── -->
+      <div class="card tabs-card reveal delay-1">
+
+        <!-- Tab Nav -->
+        <nav class="tabs-nav">
+          <button class="tab-btn active" data-tab="pattern">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Pattern
+          </button>
+          <button class="tab-btn" data-tab="eyes">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>
+            Eyes
+          </button>
+          <button class="tab-btn" data-tab="logo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Logo
+          </button>
+          <button class="tab-btn" data-tab="colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            Colors
+          </button>
+        </nav>
+
+        <!-- Tab Body -->
+        <div class="tabs-body">
+
+          <!-- ─ PATTERN TAB ─ -->
+          <div class="tab-pane active" id="pane-pattern">
+            <div class="pane-section-label">Dot Style</div>
+            <div class="options-grid" id="patternGrid">
+
+              <!-- Square -->
+              <div class="option-card" data-pattern="square">
+                <div class="option-preview">
+                  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="10" height="10" rx="0"/>
+                    <rect x="15" y="1" width="10" height="10" rx="0"/>
+                    <rect x="29" y="1" width="10" height="10" rx="0"/>
+                    <rect x="1" y="15" width="10" height="10" rx="0"/>
+                    <rect x="15" y="15" width="10" height="10" rx="0"/>
+                    <rect x="29" y="15" width="10" height="10" rx="0"/>
+                    <rect x="1" y="29" width="10" height="10" rx="0"/>
+                    <rect x="15" y="29" width="10" height="10" rx="0"/>
+                    <rect x="29" y="29" width="10" height="10" rx="0"/>
+                  </svg>
+                </div>
+                <span class="option-label">Square</span>
+              </div>
+
+              <!-- Dots -->
+              <div class="option-card" data-pattern="dots">
+                <div class="option-preview">
+                  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="6" cy="6" r="5"/>
+                    <circle cx="20" cy="6" r="5"/>
+                    <circle cx="34" cy="6" r="5"/>
+                    <circle cx="6" cy="20" r="5"/>
+                    <circle cx="20" cy="20" r="5"/>
+                    <circle cx="34" cy="20" r="5"/>
+                    <circle cx="6" cy="34" r="5"/>
+                    <circle cx="20" cy="34" r="5"/>
+                    <circle cx="34" cy="34" r="5"/>
+                  </svg>
+                </div>
+                <span class="option-label">Dots</span>
+              </div>
+
+              <!-- Rounded -->
+              <div class="option-card" data-pattern="rounded">
+                <div class="option-preview">
+                  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="10" height="10" rx="3"/>
+                    <rect x="15" y="1" width="10" height="10" rx="3"/>
+                    <rect x="29" y="1" width="10" height="10" rx="3"/>
+                    <rect x="1" y="15" width="10" height="10" rx="3"/>
+                    <rect x="15" y="15" width="10" height="10" rx="3"/>
+                    <rect x="29" y="15" width="10" height="10" rx="3"/>
+                    <rect x="1" y="29" width="10" height="10" rx="3"/>
+                    <rect x="15" y="29" width="10" height="10" rx="3"/>
+                    <rect x="29" y="29" width="10" height="10" rx="3"/>
+                  </svg>
+                </div>
+                <span class="option-label">Rounded</span>
+              </div>
+
+              <!-- Classy (diamonds) -->
+              <div class="option-card active" data-pattern="classy">
+                <div class="option-preview">
+                  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="6,1 11,6 6,11 1,6"/>
+                    <polygon points="20,1 25,6 20,11 15,6"/>
+                    <polygon points="34,1 39,6 34,11 29,6"/>
+                    <polygon points="6,15 11,20 6,25 1,20"/>
+                    <polygon points="20,15 25,20 20,25 15,20"/>
+                    <polygon points="34,15 39,20 34,25 29,20"/>
+                    <polygon points="6,29 11,34 6,39 1,34"/>
+                    <polygon points="20,29 25,34 20,39 15,34"/>
+                    <polygon points="34,29 39,34 34,39 29,34"/>
+                  </svg>
+                </div>
+                <span class="option-label">Classy</span>
+              </div>
+
+              <!-- Classy Rounded -->
+              <div class="option-card" data-pattern="classy-rounded">
+                <div class="option-preview">
+                  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="8" height="8" rx="1.8" transform="rotate(45,6,6)"/>
+                    <rect x="16" y="2" width="8" height="8" rx="1.8" transform="rotate(45,20,6)"/>
+                    <rect x="30" y="2" width="8" height="8" rx="1.8" transform="rotate(45,34,6)"/>
+                    <rect x="2" y="16" width="8" height="8" rx="1.8" transform="rotate(45,6,20)"/>
+                    <rect x="16" y="16" width="8" height="8" rx="1.8" transform="rotate(45,20,20)"/>
+                    <rect x="30" y="16" width="8" height="8" rx="1.8" transform="rotate(45,34,20)"/>
+                    <rect x="2" y="30" width="8" height="8" rx="1.8" transform="rotate(45,6,34)"/>
+                    <rect x="16" y="30" width="8" height="8" rx="1.8" transform="rotate(45,20,34)"/>
+                    <rect x="30" y="30" width="8" height="8" rx="1.8" transform="rotate(45,34,34)"/>
+                  </svg>
+                </div>
+                <span class="option-label">Classy+</span>
+              </div>
+
+            </div>
+          </div><!-- /pattern -->
+
+          <!-- ─ EYES TAB ─ -->
+          <div class="tab-pane" id="pane-eyes">
+            <div class="pane-section-label">Corner Eye Style</div>
+            <div class="options-grid" id="eyesGrid">
+
+              <!-- Classic: square outer + square inner -->
+              <div class="option-card" data-eye-outer="square" data-eye-inner="square">
+                <div class="option-preview">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="0" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <rect x="12" y="12" width="12" height="12" rx="0" fill="currentColor"/>
+                  </svg>
+                </div>
+                <span class="option-label">Classic</span>
+              </div>
+
+              <!-- Rounded: extra-rounded outer + dot inner -->
+              <div class="option-card active" data-eye-outer="extra-rounded" data-eye-inner="dot">
+                <div class="option-preview">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <circle cx="18" cy="18" r="6" fill="currentColor"/>
+                  </svg>
+                </div>
+                <span class="option-label">Rounded</span>
+              </div>
+
+              <!-- Pill: extra-rounded outer + square inner -->
+              <div class="option-card" data-eye-outer="extra-rounded" data-eye-inner="square">
+                <div class="option-preview">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <rect x="12" y="12" width="12" height="12" rx="2" fill="currentColor"/>
+                  </svg>
+                </div>
+                <span class="option-label">Pill</span>
+              </div>
+
+              <!-- Dot: dot outer + dot inner -->
+              <div class="option-card" data-eye-outer="dot" data-eye-inner="dot">
+                <div class="option-preview">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <circle cx="18" cy="18" r="6" fill="currentColor"/>
+                  </svg>
+                </div>
+                <span class="option-label">Circle</span>
+              </div>
+
+              <!-- Sharp: square outer + dot inner -->
+              <div class="option-card" data-eye-outer="square" data-eye-inner="dot">
+                <div class="option-preview">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="0" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <circle cx="18" cy="18" r="6" fill="currentColor"/>
+                  </svg>
+                </div>
+                <span class="option-label">Sharp</span>
+              </div>
+
+            </div>
+          </div><!-- /eyes -->
+
+          <!-- ─ LOGO TAB ─ -->
+          <div class="tab-pane" id="pane-logo">
+            <div class="pane-section-label">Center Logo</div>
+
+            <div class="logo-options">
+
+              <!-- Default Logo -->
+              <button class="logo-option-btn active" id="btnDefaultLogo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                Default Logo
+              </button>
+
+              <!-- Upload Logo -->
+              <label class="logo-option-btn" id="labelUploadLogo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                Upload Logo
+                <input type="file" id="logoUploadInput" accept="image/png, image/jpeg, image/webp, image/svg+xml" />
+              </label>
+
+              <!-- No Logo -->
+              <button class="logo-option-btn danger" id="btnNoLogo" style="grid-column: 1 / -1;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                Remove Logo
+              </button>
+
+            </div>
+
+            <!-- Upload preview -->
+            <div class="logo-upload-preview" id="logoUploadPreview">
+              <img class="logo-thumb" id="logoThumbImg" src="" alt="Logo" />
+              <div class="logo-thumb-info">
+                <strong>Logo Applied</strong>
+                <span id="logoFileName">Custom logo</span>
+              </div>
+              <button class="logo-colors-btn" id="btnApplyLogoColors">
+                Apply Colors
+              </button>
+            </div>
+
+          </div><!-- /logo -->
+
+          <!-- ─ COLORS TAB ─ -->
+          <div class="tab-pane" id="pane-colors">
+            <div class="pane-section-label">QR Colors</div>
+
+            <div class="color-rows">
+
+              <!-- Dot Color -->
+              <div class="color-row">
+                <div class="color-row-info">
+                  <div class="color-row-label">Dot Color</div>
+                  <div class="color-row-sub">Main QR pattern dots</div>
+                </div>
+                <div class="color-picker-group">
+                  <div class="color-picker-swatch" id="dotColorSwatch" style="background:#1A1A1A;">
+                    <input type="color" id="dotColorInput" value="#1a1a1a" />
+                  </div>
+                  <div class="color-hex-display" id="dotColorHex">#1A1A1A</div>
+                </div>
+              </div>
+
+              <!-- Corner Color -->
+              <div class="color-row">
+                <div class="color-row-info">
+                  <div class="color-row-label">Corner Color</div>
+                  <div class="color-row-sub">Eye / finder patterns</div>
+                </div>
+                <div class="color-picker-group">
+                  <div class="color-picker-swatch" id="cornerColorSwatch" style="background:#C9A857;">
+                    <input type="color" id="cornerColorInput" value="#C9A857" />
+                  </div>
+                  <div class="color-hex-display" id="cornerColorHex">#C9A857</div>
+                </div>
+              </div>
+
+              <!-- Background Color -->
+              <div class="color-row">
+                <div class="color-row-info">
+                  <div class="color-row-label">Background</div>
+                  <div class="color-row-sub">QR background fill</div>
+                </div>
+                <div class="color-picker-group">
+                  <div class="color-picker-swatch" id="bgColorSwatch" style="background:#ffffff; border-color:rgba(201,168,87,0.3);">
+                    <input type="color" id="bgColorInput" value="#ffffff" />
+                  </div>
+                  <div class="color-hex-display" id="bgColorHex">#FFFFFF</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Contrast indicator -->
+            <div class="contrast-indicator good" id="contrastIndicator">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="contrastText">High contrast — fully scannable</span>
+            </div>
+
+          </div><!-- /colors -->
+
+        </div><!-- /tabs-body -->
+      </div><!-- /tabs-card -->
+
+    </div><!-- /controls-panel -->
+
+    <!-- ┌──────────────────────────────────────────┐ -->
+    <!-- │  RIGHT: PREVIEW PANEL                    │ -->
+    <!-- └──────────────────────────────────────────┘ -->
+    <div class="preview-panel">
+
+      <!-- QR Showcase -->
+      <div class="qr-showcase reveal delay-2">
+        <div class="qr-ambient"></div>
+
+        <div class="qr-outer-frame" style="width:100%; max-width:380px;">
+          <!-- Corner accent marks -->
+          <div class="qr-corner-mark tl"></div>
+          <div class="qr-corner-mark tr"></div>
+          <div class="qr-corner-mark bl"></div>
+          <div class="qr-corner-mark br"></div>
+
+          <div class="qr-inner-surface">
+            <div id="qr-preview">
+              <!-- Generating overlay -->
+              <div class="qr-overlay" id="qrOverlay">
+                <div class="ring-spinner"></div>
+                <span>Generating</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-info-row">
+          <span class="qr-current-url" id="currentUrlDisplay">https://www.ampkart.co.in</span>
+        </div>
+
+        <div class="scan-test">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+          Point camera to test scannability
+        </div>
+      </div>
+
+      <!-- Download Card -->
+      <div class="card download-card reveal delay-3">
+        <div class="download-top">
+          <div class="section-eyebrow">Export</div>
+          <select class="res-select" id="resSelect">
+            <option value="1024">HD — 1024px</option>
+            <option value="2048">2K — 2048px</option>
+            <option value="4096" selected>4K — 4096px</option>
+          </select>
+        </div>
+
+        <div class="download-buttons">
+          <button class="btn-download" id="btnDownloadPng">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="11" y2="17"/></svg>
+            PNG
+          </button>
+          <button class="btn-download" id="btnDownloadSvg">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            SVG
+          </button>
+          <button class="btn-download primary" id="btnDownload4K">
+            <svg id="dlIcon4k" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span class="loader" id="dlSpinner4k"></span>
+            <span id="dlText4k">Download 4K</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /preview-panel -->
+
+  </main><!-- /app-main -->
+
+</div><!-- /app-wrapper -->
+
+<!-- Toast -->
+<div id="toast">
+  <svg class="toast-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toastMsg">Success</span>
+</div>
+
+<script src="qr.js"></script>
+</body>
+</html>

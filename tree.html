@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZIP Structure Visualizer</title>
+  <link rel="stylesheet" href="tree.css" />
+
+  <!-- Google Fonts: Syne (display) + JetBrains Mono (code) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- JSZip CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       BACKGROUND GRID DECORATION
+  ═══════════════════════════════════════════ -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       THEME TOGGLE
+  ═══════════════════════════════════════════ -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+    <span class="theme-icon theme-icon--dark">
+      <!-- Moon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </span>
+    <span class="theme-icon theme-icon--light">
+      <!-- Sun -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </span>
+  </button>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN WRAPPER
+  ═══════════════════════════════════════════ -->
+  <main class="main-wrapper">
+
+    <!-- ─── HEADER ─── -->
+    <header class="header" role="banner">
+      <div class="header__badge">
+        <span class="badge-dot"></span>
+        <span>Tool v1.0</span>
+      </div>
+      <div class="header__icon" aria-hidden="true">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <rect x="2" y="8" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 18l-6 6 6 6M30 18l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M26 15l-8 14" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="header__title">ZIP Structure<br /><em>Visualizer</em></h1>
+      <p class="header__subtitle">
+        Upload any <code>.zip</code> file and instantly generate a clean,<br class="desktop-only"/>
+        developer-readable project structure map.
+      </p>
+    </header>
+
+    <!-- ─── UPLOAD CARD ─── -->
+    <section class="card upload-card" aria-label="Upload ZIP file">
+
+      <!-- Drop Zone -->
+      <div
+        class="drop-zone"
+        id="dropZone"
+        role="button"
+        tabindex="0"
+        aria-label="Drag and drop ZIP file here, or click to browse"
+        aria-describedby="dropZoneHint"
+      >
+        <!-- Animated corner decorations -->
+        <span class="corner corner--tl" aria-hidden="true"></span>
+        <span class="corner corner--tr" aria-hidden="true"></span>
+        <span class="corner corner--bl" aria-hidden="true"></span>
+        <span class="corner corner--br" aria-hidden="true"></span>
+
+        <div class="drop-zone__inner">
+          <div class="drop-zone__icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect x="6" y="4" width="24" height="32" rx="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M30 4l8 8v28a3 3 0 01-3 3H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M30 4v8h8" stroke="currentColor" stroke-width="2"/>
+              <path d="M24 28v10M20 34l4 4 4-4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="drop-zone__label">Drop your <strong>.zip</strong> file here</p>
+          <p class="drop-zone__hint" id="dropZoneHint">or click to browse files</p>
+          <button class="btn btn--outline" type="button" id="browseBtn" aria-controls="fileInput">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Browse ZIP File
+          </button>
+        </div>
+
+        <!-- Hidden file input -->
+        <input
+          type="file"
+          id="fileInput"
+          accept=".zip,application/zip,application/x-zip-compressed"
+          class="file-input-hidden"
+          aria-hidden="true"
+          tabindex="-1"
+        />
+      </div>
+
+      <!-- File Info Bar (shown after upload) -->
+      <div class="file-info" id="fileInfo" aria-live="polite" hidden>
+        <div class="file-info__icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <span class="file-info__name" id="fileName">—</span>
+        <span class="file-info__size" id="fileSize"></span>
+        <button class="file-info__clear" id="clearFile" aria-label="Remove file" title="Remove file">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ─── ACTION BUTTON ─── -->
+    <div class="action-row">
+      <button
+        class="btn btn--primary btn--lg"
+        id="generateBtn"
+        type="button"
+        disabled
+        aria-label="Generate structure from ZIP file"
+      >
+        <span class="btn__default-state">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Generate Structure
+        </span>
+        <span class="btn__loading-state" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          Parsing ZIP…
+        </span>
+      </button>
+    </div>
+
+    <!-- ─── ERROR / EMPTY MESSAGE ─── -->
+    <div class="message message--error" id="errorMsg" role="alert" aria-live="assertive" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- ─── OUTPUT CARD ─── -->
+    <section class="card output-card" id="outputCard" aria-label="Structure output" hidden>
+
+      <!-- Output Header Bar (like a terminal title bar) -->
+      <div class="output-header">
+        <div class="output-header__dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="output-header__title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span id="outputTitle">structure.txt</span>
+        </div>
+        <div class="output-header__meta" id="outputMeta"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="output-toolbar" role="toolbar" aria-label="Output actions">
+        <!-- Expand/Collapse toggle -->
+        <div class="toolbar-group">
+          <button class="tool-btn" id="expandAllBtn" title="Expand all folders" aria-pressed="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+            Expanded
+          </button>
+          <button class="tool-btn" id="collapseAllBtn" title="Collapse all folders" aria-pressed="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>
+            Collapsed
+          </button>
+        </div>
+
+        <!-- Stats chips -->
+        <div class="toolbar-stats" id="toolbarStats" aria-label="File statistics">
+          <span class="stat-chip" id="statFolders">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            0 folders
+          </span>
+          <span class="stat-chip" id="statFiles">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            0 files
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="toolbar-group toolbar-group--right">
+          <button class="tool-btn" id="copyBtn" title="Copy to clipboard" aria-label="Copy structure to clipboard">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <button class="tool-btn tool-btn--accent" id="downloadBtn" title="Download as .txt" aria-label="Download structure as text file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .txt
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Output -->
+      <div class="output-body" role="region" aria-label="Structure tree output">
+        <pre class="structure-output" id="structureOutput" aria-live="polite"></pre>
+      </div>
+
+    </section>
+
+    <!-- ─── COPY TOAST ─── -->
+    <div class="toast" id="copyToast" role="status" aria-live="polite" aria-atomic="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Copied to clipboard!
+    </div>
+
+    <!-- ─── FOOTER ─── -->
+    <footer class="footer" role="contentinfo">
+      <p>Built with <span aria-label="love">♥</span> using <a href="https://stuk.github.io/jszip/" target="_blank" rel="noopener noreferrer">JSZip</a></p>
+    </footer>
+
+  </main>
+
+  <script>
+/**
+ * ZIP Structure Visualizer — app.js
+ * Production-quality, fully modular JavaScript.
+ *
+ * Architecture:
+ *  ThemeManager     — dark/light toggle with localStorage persistence
+ *  DropZoneManager  — drag-and-drop + file input + validation
+ *  ZipParser        — JSZip extraction → nested tree object
+ *  TreeRenderer     — tree object → colorized HTML + plain text
+ *  ClipboardManager — async copy + fallback + toast notification
+ *  DownloadManager  — Blob-based .txt download
+ *  UIController     — state orchestrator, wires everything together
+ */
+
+'use strict';
+
+/* ================================================================
+   THEME MANAGER
+================================================================ */
+const ThemeManager = (() => {
+  const STORAGE_KEY = 'zip-vis-theme';
+  const root = document.documentElement;
+  const btn  = document.getElementById('themeToggle');
+
+  function apply(theme) {
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch(_) {}
+  }
+
+  function init() {
+    let saved = 'dark';
+    try { saved = localStorage.getItem(STORAGE_KEY) || 'dark'; } catch(_) {}
+    apply(saved);
+
+    btn.addEventListener('click', () => {
+      apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  return { init };
+})();
+
+
+/* ================================================================
+   DROP ZONE MANAGER
+================================================================ */
+const DropZoneManager = (() => {
+  const dropZone  = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const browseBtn = document.getElementById('browseBtn');
+  const clearBtn  = document.getElementById('clearFile');
+
+  let _onFile = null;
+
+  function init(callback) {
+    _onFile = callback;
+
+    // Open file dialog on drop zone / browse button click
+    dropZone.addEventListener('click', (e) => {
+      if (!e.target.closest('.file-input-hidden')) fileInput.click();
+    });
+    browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+
+    // Keyboard: Enter / Space
+    dropZone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+
+    // Native file input change
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) process(fileInput.files[0]);
+    });
+
+    // Clear button
+    clearBtn.addEventListener('click', (e) => { e.stopPropagation(); reset(); });
+
+    // Drag events
+    dropZone.addEventListener('dragenter', halt);
+    dropZone.addEventListener('dragover',  (e) => { halt(e); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', (e) => { halt(e); dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('dragend',   (e) => { halt(e); dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', (e) => {
+      halt(e);
+      dropZone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) process(f);
+    });
+
+    // Prevent browser default drag (open file)
+    window.addEventListener('dragover', halt);
+    window.addEventListener('drop', halt);
+  }
+
+  function halt(e) { e.preventDefault(); e.stopPropagation(); }
+
+  function process(file) {
+    const valid = file.name.toLowerCase().endsWith('.zip')
+               || ['application/zip', 'application/x-zip-compressed',
+                   'application/x-zip', 'application/octet-stream'].includes(file.type);
+
+    if (!valid) {
+      UIController.showError('Invalid file type. Please select a <strong>.zip</strong> archive.');
+      reset(false);
+      return;
+    }
+
+    UIController.hideError();
+    showInfo(file);
+    if (_onFile) _onFile(file);
+  }
+
+  function showInfo(file) {
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = fmtBytes(file.size);
+    document.getElementById('fileInfo').hidden = false;
+  }
+
+  function reset(clearError = true) {
+    fileInput.value = '';
+    document.getElementById('fileInfo').hidden = true;
+    document.getElementById('fileName').textContent = '—';
+    document.getElementById('fileSize').textContent = '';
+    if (clearError) UIController.hideError();
+    UIController.hideOutput();
+    UIController.setGenBtnEnabled(false);
+  }
+
+  /** Format bytes → KB / MB */
+  function fmtBytes(bytes) {
+    if (bytes < 1024)      return bytes + ' B';
+    if (bytes < 1048576)   return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+  }
+
+  return { init, reset };
+})();
+
+
+/* ================================================================
+   ZIP PARSER
+================================================================ */
+const ZipParser = (() => {
+
+  /**
+   * Parse a ZIP File object.
+   * Returns { tree, rootName, stats }
+   */
+  async function parse(file) {
+    if (typeof JSZip === 'undefined') {
+      throw new Error('JSZip library is not loaded. Please check your internet connection.');
+    }
+
+    const zip    = new JSZip();
+    const loaded = await zip.loadAsync(file);
+    const keys   = Object.keys(loaded.files);
+
+    // Filter out macOS metadata files
+    const clean = keys.filter(k => !k.startsWith('__MACOSX') && !k.endsWith('.DS_Store'));
+
+    if (clean.length === 0) {
+      throw new Error('The ZIP file is empty or contains no readable files.');
+    }
+
+    const rootName = detectRoot(clean);
+    const tree     = buildTree(clean, rootName);
+    const stats    = countStats(loaded.files);
+
+    return { tree, rootName, stats };
+  }
+
+  /**
+   * Detect if all entries share a single top-level folder.
+   * Returns that folder name, or 'root' if mixed.
+   */
+  function detectRoot(entries) {
+    const tops    = entries.map(e => e.split('/')[0]).filter(Boolean);
+    const unique  = [...new Set(tops)];
+    return unique.length === 1 ? unique[0] : 'root';
+  }
+
+  /**
+   * Build a nested tree from flat path array.
+   * Folders → plain object  {}
+   * Files   → null
+   */
+  function buildTree(entries, rootName) {
+    const tree = {};
+
+    for (const path of entries) {
+      const parts    = path.split('/').filter(Boolean);
+      // Strip the common root prefix
+      const start    = parts[0] === rootName ? 1 : 0;
+      const relevant = parts.slice(start);
+      if (relevant.length === 0) continue;
+
+      let node = tree;
+      for (let i = 0; i < relevant.length; i++) {
+        const seg    = relevant[i];
+        const isLast = i === relevant.length - 1;
+        const isFile = isLast && !path.endsWith('/');
+
+        if (isFile) {
+          if (!(seg in node)) node[seg] = null;
+        } else {
+          if (!(seg in node) || node[seg] === null) node[seg] = {};
+          node = node[seg];
+        }
+      }
+    }
+    return tree;
+  }
+
+  function countStats(filesMap) {
+    let folders = 0, files = 0;
+    for (const e of Object.values(filesMap)) {
+      if (e.name.startsWith('__MACOSX') || e.name.endsWith('.DS_Store')) continue;
+      e.dir ? folders++ : files++;
+    }
+    return { folders, files };
+  }
+
+  return { parse };
+})();
+
+
+/* ================================================================
+   TREE RENDERER
+================================================================ */
+const TreeRenderer = (() => {
+
+  const BRANCH = '├── ';
+  const LAST   = '└── ';
+  const PIPE   = '│   ';
+  const SPACE  = '    ';
+
+  // File extension → color class
+  const EXT = {
+    html:'ext-html', htm:'ext-html',
+    css:'ext-css', scss:'ext-css', sass:'ext-css', less:'ext-css',
+    js:'ext-js', jsx:'ext-js', cjs:'ext-js', mjs:'ext-js',
+    ts:'ext-ts', tsx:'ext-ts', d:'ext-ts',
+    json:'ext-json', jsonc:'ext-json', json5:'ext-json',
+    md:'ext-md', mdx:'ext-md', txt:'ext-md', rst:'ext-md',
+    png:'ext-img', jpg:'ext-img', jpeg:'ext-img', gif:'ext-img',
+      svg:'ext-img', webp:'ext-img', ico:'ext-img', avif:'ext-img',
+    woff:'ext-font', woff2:'ext-font', ttf:'ext-font', otf:'ext-font', eot:'ext-font',
+    zip:'ext-zip', gz:'ext-zip', tar:'ext-zip', rar:'ext-zip', '7z':'ext-zip',
+  };
+
+  /**
+   * Render tree to both HTML (colorized) and plain text.
+   * @param {object} tree
+   * @param {string} rootName
+   * @returns {{ html: string, plain: string }}
+   */
+  function render(tree, rootName) {
+    const html  = [];
+    const plain = [];
+
+    // Root line
+    const rootLabel = rootName + '/';
+    html.push(`<span class="root-name">${esc(rootLabel)}</span>`);
+    plain.push(rootLabel);
+    html.push(`<span class="tree-line">│</span>`);
+    plain.push('│');
+
+    walk(tree, '', html, plain);
+
+    return { html: html.join('\n'), plain: plain.join('\n') };
+  }
+
+  function walk(node, prefix, html, plain) {
+    if (!node || typeof node !== 'object') return;
+
+    const entries = Object.entries(node);
+
+    // Sort: folders first (object), then files (null), each group alphabetically
+    const sorted = [
+      ...entries.filter(([,v]) => v !== null).sort(([a],[b]) => a.localeCompare(b, undefined, {sensitivity:'base'})),
+      ...entries.filter(([,v]) => v === null).sort(([a],[b]) => a.localeCompare(b, undefined, {sensitivity:'base'})),
+    ];
+
+    sorted.forEach(([name, value], idx) => {
+      const last        = idx === sorted.length - 1;
+      const conn        = last ? LAST : BRANCH;
+      const childPrefix = prefix + (last ? SPACE : PIPE);
+      const isFolder    = value !== null;
+
+      if (isFolder) {
+        const label = name + '/';
+        html.push(
+          `<span class="tree-line">${esc(prefix + conn)}</span>` +
+          `<span class="folder-name">${esc(label)}</span>`
+        );
+        plain.push(prefix + conn + label);
+        walk(value, childPrefix, html, plain);
+      } else {
+        const cls = extClass(name);
+        html.push(
+          `<span class="tree-line">${esc(prefix + conn)}</span>` +
+          `<span class="file-name${cls ? ' '+cls : ''}">${esc(name)}</span>`
+        );
+        plain.push(prefix + conn + name);
+      }
+    });
+  }
+
+  function extClass(filename) {
+    const dot = filename.lastIndexOf('.');
+    if (dot < 0) return '';
+    return EXT[filename.slice(dot + 1).toLowerCase()] || '';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  return { render };
+})();
+
+
+/* ================================================================
+   CLIPBOARD MANAGER
+================================================================ */
+const ClipboardManager = (() => {
+  const toast  = document.getElementById('copyToast');
+  const copyBtn = document.getElementById('copyBtn');
+  let timer = null;
+
+  async function copy(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (_) {
+      // Fallback for HTTP or older browsers
+      const ta = Object.assign(document.createElement('textarea'), {
+        value: text,
+        style: 'position:fixed;opacity:0'
+      });
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    showToast();
+    flashCopyBtn();
+  }
+
+  function showToast() {
+    if (timer) clearTimeout(timer);
+    toast.classList.add('show');
+    timer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  function flashCopyBtn() {
+    const orig = copyBtn.innerHTML;
+    copyBtn.classList.add('copy-success');
+    copyBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>Copied!`;
+    setTimeout(() => {
+      copyBtn.classList.remove('copy-success');
+      copyBtn.innerHTML = orig;
+    }, 2000);
+  }
+
+  return { copy };
+})();
+
+
+/* ================================================================
+   DOWNLOAD MANAGER
+================================================================ */
+const DownloadManager = (() => {
+  function download(text, filename) {
+    const a   = document.createElement('a');
+    a.href    = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.append(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+  }
+  return { download };
+})();
+
+
+/* ================================================================
+   UI CONTROLLER
+================================================================ */
+const UIController = (() => {
+
+  // ── DOM refs ──
+  const genBtn       = document.getElementById('generateBtn');
+  const outputCard   = document.getElementById('outputCard');
+  const structOut    = document.getElementById('structureOutput');
+  const outputTitle  = document.getElementById('outputTitle');
+  const outputMeta   = document.getElementById('outputMeta');
+  const statFolders  = document.getElementById('statFolders');
+  const statFiles    = document.getElementById('statFiles');
+  const errorMsg     = document.getElementById('errorMsg');
+  const errorText    = document.getElementById('errorText');
+  const expandBtn    = document.getElementById('expandAllBtn');
+  const collapseBtn  = document.getElementById('collapseAllBtn');
+  const copyBtn      = document.getElementById('copyBtn');
+  const dlBtn        = document.getElementById('downloadBtn');
+
+  // ── State ──
+  let _file      = null;
+  let _tree      = null;
+  let _rootName  = 'root';
+  let _plain     = '';
+  let _expanded  = true;
+
+  // ── Init ──
+  function init() {
+    ThemeManager.init();
+    DropZoneManager.init(onFile);
+
+    genBtn.addEventListener('click', onGenerate);
+    expandBtn.addEventListener('click', () => setExpanded(true));
+    collapseBtn.addEventListener('click', () => setExpanded(false));
+    copyBtn.addEventListener('click', () => _plain && ClipboardManager.copy(_plain));
+    dlBtn.addEventListener('click', onDownload);
+  }
+
+  function onFile(file) {
+    _file = file;
+    setGenBtnEnabled(true);
+    hideOutput();
+    hideError();
+  }
+
+  // ── Generate ──
+  async function onGenerate() {
+    if (!_file) return;
+    setLoading(true);
+    hideOutput();
+    hideError();
+
+    try {
+      const result = await ZipParser.parse(_file);
+      _tree     = result.tree;
+      _rootName = result.rootName;
+
+      const { html, plain } = TreeRenderer.render(_tree, _rootName);
+      _plain    = plain;
+      _expanded = true;
+
+      renderOutput({ html, plain: _plain, rootName: _rootName, stats: result.stats });
+
+    } catch (err) {
+      console.error('[ZipVisualizer]', err);
+      showError(err.message || 'Failed to parse ZIP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Expand / Collapse ──
+  function setExpanded(exp) {
+    if (!_tree) return;
+    _expanded = exp;
+
+    if (exp) {
+      // Full render
+      const { html, plain } = TreeRenderer.render(_tree, _rootName);
+      _plain = plain;
+      structOut.innerHTML = html;
+    } else {
+      // Collapsed: show only root + depth-0 children
+      const collapsedHtml  = renderCollapsed(_tree, _rootName);
+      structOut.innerHTML  = collapsedHtml;
+      // Keep _plain as full text for copy/download
+    }
+
+    expandBtn.setAttribute('aria-pressed',   String(exp));
+    collapseBtn.setAttribute('aria-pressed', String(!exp));
+  }
+
+  /**
+   * Render a single-level collapsed view (root + immediate children only).
+   * Folders shown with a "..." hint if they have children.
+   */
+  function renderCollapsed(tree, rootName) {
+    const lines = [];
+    const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    // Root
+    lines.push(`<span class="root-name">${esc(rootName + '/')}</span>`);
+    lines.push(`<span class="tree-line">│</span>`);
+
+    const entries = Object.entries(tree);
+    const sorted = [
+      ...entries.filter(([,v]) => v !== null).sort(([a],[b])=>a.localeCompare(b,undefined,{sensitivity:'base'})),
+      ...entries.filter(([,v]) => v === null).sort(([a],[b])=>a.localeCompare(b,undefined,{sensitivity:'base'})),
+    ];
+
+    sorted.forEach(([name, value], idx) => {
+      const last   = idx === sorted.length - 1;
+      const conn   = last ? '└── ' : '├── ';
+      const prefix = '';
+
+      if (value !== null) {
+        // Folder — show child count as hint
+        const childCount = Object.keys(value).length;
+        const hint = childCount > 0
+          ? `<span class="tree-line"> <span style="opacity:0.4;font-size:0.85em">[${childCount} item${childCount>1?'s':''}]</span></span>`
+          : '';
+        lines.push(
+          `<span class="tree-line">${esc(prefix + conn)}</span>` +
+          `<span class="folder-name">${esc(name + '/')}</span>` + hint
+        );
+      } else {
+        const cls = extClassPublic(name);
+        lines.push(
+          `<span class="tree-line">${esc(prefix + conn)}</span>` +
+          `<span class="file-name${cls?' '+cls:''}">${esc(name)}</span>`
+        );
+      }
+    });
+
+    return lines.join('\n');
+  }
+
+  function extClassPublic(filename) {
+    const EXT = {
+      html:'ext-html',htm:'ext-html',css:'ext-css',scss:'ext-css',
+      js:'ext-js',jsx:'ext-js',ts:'ext-ts',tsx:'ext-ts',
+      json:'ext-json',md:'ext-md',txt:'ext-md',
+      png:'ext-img',jpg:'ext-img',jpeg:'ext-img',svg:'ext-img',ico:'ext-img',gif:'ext-img',
+      woff:'ext-font',woff2:'ext-font',ttf:'ext-font',
+      zip:'ext-zip',gz:'ext-zip',
+    };
+    const dot = filename.lastIndexOf('.');
+    if (dot < 0) return '';
+    return EXT[filename.slice(dot+1).toLowerCase()] || '';
+  }
+
+  // ── Render Output Card ──
+  function renderOutput({ html, plain, rootName, stats }) {
+    outputTitle.textContent = rootName + '-structure.txt';
+    outputMeta.textContent  = (stats.folders + stats.files) + ' entries';
+
+    statFolders.innerHTML = folderIcon() + ` ${stats.folders} folder${stats.folders!==1?'s':''}`;
+    statFiles.innerHTML   = fileIcon()   + ` ${stats.files} file${stats.files!==1?'s':''}`;
+
+    structOut.innerHTML = html;
+    outputCard.hidden   = false;
+
+    updateExpandBtns();
+
+    // Smooth scroll to output
+    setTimeout(() => outputCard.scrollIntoView({ behavior:'smooth', block:'nearest' }), 80);
+  }
+
+  function updateExpandBtns() {
+    expandBtn.setAttribute('aria-pressed',   String(_expanded));
+    collapseBtn.setAttribute('aria-pressed', String(!_expanded));
+  }
+
+  // ── Download ──
+  function onDownload() {
+    if (!_plain || !_file) return;
+    const name = _file.name.replace(/\.zip$/i, '') + '-structure.txt';
+    DownloadManager.download(_plain, name);
+  }
+
+  // ── Helpers ──
+  function setGenBtnEnabled(en) { genBtn.disabled = !en; }
+
+  function setLoading(on) {
+    genBtn.disabled = on;
+    genBtn.querySelector('.btn__default-state').hidden = on;
+    genBtn.querySelector('.btn__loading-state').hidden = !on;
+  }
+
+  function showError(msg) {
+    errorText.innerHTML = msg;
+    errorMsg.hidden     = false;
+  }
+
+  function hideError() { errorMsg.hidden = true; }
+
+  function hideOutput() { outputCard.hidden = true; }
+
+  function folderIcon() {
+    return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`;
+  }
+  function fileIcon() {
+    return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+  }
+
+  return { init, showError, hideError, hideOutput, setGenBtnEnabled };
+})();
+
+
+/* ================================================================
+   BOOT
+================================================================ */
+document.addEventListener('DOMContentLoaded', UIController.init);
+</script>
+</body>
+</html>

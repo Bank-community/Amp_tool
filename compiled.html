@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F8FAFC">
+<title>Code Compiler – Paste. Configure. Download.</title>
+<style>
+/* ===== Tokens ===== */
+:root{
+  --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0; --tx:#172033; --mut:#64748B;
+  --ac:#4F46E5; --ac2:#6366F1; --ok:#16A34A; --err:#DC2626; --code:#F8FAFC;
+  --r:14px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100vh;display:flex;flex-direction:column;
+  background:var(--bg);color:var(--tx);
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+button,input,textarea{font:inherit;color:inherit}
+
+/* ===== Header / footer ===== */
+.hdr{display:flex;align-items:center;gap:12px;padding:16px;max-width:760px;width:100%;margin:0 auto}
+.hdr h1{margin:0;font-size:1.25rem;line-height:1.2}
+.hdr p{margin:2px 0 0;color:var(--mut);font-size:.85rem}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--ac);display:grid;place-items:center;color:#fff;flex:none}
+footer{margin-top:auto;padding:24px 16px;text-align:center;color:var(--mut);font-size:.8rem}
+footer p{margin:2px 0}
+
+/* ===== Layout ===== */
+main{width:100%;max-width:760px;margin:0 auto;padding:0 12px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.05)}
+.step-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step-h h2{margin:0;font-size:1.05rem}
+.num{font:700 .75rem var(--mono);background:rgba(79,70,229,.1);color:var(--ac);padding:4px 8px;border-radius:8px}
+.hint{margin:10px 0 0;color:var(--mut);font-size:.85rem}
+.lbl{display:block;margin:16px 0 6px;font-weight:600;font-size:.9rem}
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;transition:background .15s,border-color .15s,opacity .15s;
+}
+.btn:hover{border-color:var(--ac2)}
+.btn.primary{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.btn.primary:hover{background:#4338ca}
+.btn.danger{color:var(--err)}
+.btn.big{width:100%;min-height:52px;font-size:1rem}
+.btn.sm{min-height:38px;padding:0 12px;font-size:.85rem}
+.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.btn.outline{background:#fff;border:1.5px solid var(--ac);color:var(--ac);font-weight:600}
+.btn.outline:hover{background:#EEF2FF;border-color:var(--ac)}
+.actions{display:grid;grid-template-columns:1fr;gap:10px}
+:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+
+.spin{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+.busy .spin{display:inline-block}
+.busy .ico{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ===== Editor ===== */
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.editor{
+  --lh:20px;display:flex;height:clamp(280px,55vh,540px);
+  background:var(--code);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+}
+.editor:focus-within{border-color:var(--ac2)}
+#gutter,#code{
+  margin:0;padding:12px 0;font:13px/var(--lh) var(--mono);tab-size:2;-moz-tab-size:2;
+}
+#gutter{
+  flex:none;min-width:3.2em;padding:12px 10px 60px;text-align:right;color:#75839A;
+  background:#F1F5F9;border-right:1px solid var(--line);overflow:hidden;user-select:none;
+}
+#code{
+  flex:1;min-width:0;padding:12px;border:0;outline:0;resize:none;background:transparent;
+  white-space:pre;overflow:auto;color:var(--tx);
+}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;color:var(--mut);font-size:.8rem}
+.stats b{color:var(--tx);font-family:var(--mono)}
+
+/* ===== Inputs ===== */
+#fname{
+  width:100%;min-height:48px;padding:0 14px;border-radius:12px;
+  background:var(--code);border:1px solid var(--line);
+}
+#fname:focus{border-color:var(--ac2);outline:0}
+#fname::placeholder{color:#7C8BA1}
+
+/* ===== Language cards ===== */
+.langs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lang{position:relative;cursor:pointer}
+.lang input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.lc{
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
+  padding:12px 4px;border:1px solid var(--line);border-radius:12px;background:var(--code);
+  transition:border-color .15s,background .15s;
+}
+.lc small{color:var(--mut);font-family:var(--mono)}
+.lc strong{font-size:.85rem}
+.lang input:checked + .lc{border-color:var(--ac);background:#EEF2FF;box-shadow:0 0 0 1px var(--ac)}
+.lang input:focus-visible + .lc{outline:2px solid var(--ac2);outline-offset:2px}
+
+/* ===== Download ===== */
+.preview{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--code);border:1px solid var(--line);margin-bottom:10px}
+.preview span{color:var(--mut);font-size:.8rem}
+.preview code{font-family:var(--mono);overflow-wrap:anywhere}
+.status{min-height:1.4em;margin:0 0 10px;font-size:.85rem;color:var(--mut)}
+.status.ready{color:#15803D}
+
+/* ===== Toast & dialog ===== */
+#toast{
+  position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  max-width:calc(100% - 32px);padding:12px 16px;border-radius:12px;background:#fff;color:var(--tx);border:1px solid var(--line);border-left:4px solid var(--ac);
+  box-shadow:0 8px 24px rgba(15,23,42,.15);transition:opacity .2s,transform .2s;z-index:50;font-size:.9rem;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.ok{border-left-color:var(--ok)}
+#toast.err{border-left-color:var(--err)}
+#toast.warn{border-left-color:#D97706}
+dialog{max-width:380px;width:calc(100% - 32px);padding:20px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);color:var(--tx)}
+dialog::backdrop{background:rgba(15,23,42,.45)}
+dialog h3{margin:0 0 6px}
+dialog p{margin:0 0 16px;color:var(--mut)}
+dialog .row{display:flex;gap:8px;justify-content:flex-end}
+
+@media (min-width:600px){
+  .hdr{padding:24px 16px}
+  .card{padding:24px}
+  .actions{grid-template-columns:1fr 1fr}
+  #step3 .btn.big{display:flex;width:auto;min-width:240px;margin:0 auto}
+}
+@media (min-width:480px){.langs{grid-template-columns:repeat(4,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important}}
+
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg>
+  </div>
+  <div>
+    <h1>Code Compiler</h1>
+    <p>Paste. Configure. Download.</p>
+  </div>
+</header>
+
+<main>
+  <!-- STEP 01 -->
+  <section class="card" id="step1" aria-labelledby="h1s">
+    <div class="step-h"><span class="num">01</span><h2 id="h1s">Add Your Code</h2></div>
+    <div class="actions">
+      <button type="button" id="pasteBtn" class="btn primary big">
+        <span class="spin" aria-hidden="true"></span>
+        <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+        <span id="pasteLbl">Paste Code</span>
+      </button>
+      <button type="button" id="openBtn" class="btn outline big">
+        <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+        <span>Open Editor</span>
+      </button>
+    </div>
+  
+  </section>
+
+  <!-- STEP 02 -->
+  <section class="card" id="step2" aria-labelledby="h2s" hidden>
+    <div class="step-h"><span class="num">02</span><h2 id="h2s">Edit Code &amp; Configure File</h2></div>
+
+    <div class="tools" role="toolbar" aria-label="Editor controls">
+      <button type="button" class="btn sm" id="selBtn">Select All</button>
+      <button type="button" class="btn sm" id="copyBtn">Copy Code</button>
+      <button type="button" class="btn sm" id="undoBtn">Undo</button>
+      <button type="button" class="btn sm" id="redoBtn">Redo</button>
+      <button type="button" class="btn sm danger" id="clearBtn">Clear Code</button>
+    </div>
+
+    <div class="editor">
+      <pre id="gutter" aria-hidden="true">1</pre>
+      <textarea id="code" wrap="off" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-label="Code editor" placeholder="Paste or type your code here…"></textarea>
+    </div>
+    <div class="stats" aria-live="off">
+      <span><b id="stLines">0</b> lines</span>
+      <span><b id="stChars">0</b> chars</span>
+      <span><b id="stSize">0 B</b></span>
+    </div>
+
+    <label class="lbl" for="fname">Enter File Name</label>
+    <input id="fname" type="text" placeholder="my-project" maxlength="100" autocomplete="off" autocapitalize="off" spellcheck="false">
+
+    <div class="lbl" id="langLbl">Select Language</div>
+    <div class="langs" role="radiogroup" aria-labelledby="langLbl">
+      <label class="lang">
+        <input type="radio" name="lang" value="html">
+        <span class="lc">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>
+          <strong>HTML</strong><small>.html</small>
+        </span>
+      </label>
+      <label class="lang">
+        <input type="radio" name="lang" value="css">
+        <span class="lc">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg>
+          <strong>CSS</strong><small>.css</small>
+        </span>
+      </label>
+      <label class="lang">
+        <input type="radio" name="lang" value="js">
+        <span class="lc">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M11 8v6.5a1.5 1.5 0 0 1-3 0M14.5 15.5c.5.8 1.2 1 2 1 1 0 1.8-.5 1.8-1.4 0-2-3.8-1.2-3.8-3.2 0-.8.7-1.4 1.8-1.4.8 0 1.4.3 1.8.9"/></svg>
+          <strong>JavaScript</strong><small>.js</small>
+        </span>
+      </label>
+      <label class="lang">
+        <input type="radio" name="lang" value="txt">
+        <span class="lc">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+          <strong>Text</strong><small>.txt</small>
+        </span>
+      </label>
+    </div>
+    <p class="hint" id="langHint">Pick one. Your filename extension or code can suggest it.</p>
+  </section>
+
+  <!-- STEP 03 -->
+  <section class="card" id="step3" aria-labelledby="h3s" hidden>
+    <div class="step-h"><span class="num">03</span><h2 id="h3s">Download File</h2></div>
+    <div class="preview"><span>File</span><code id="preview">—</code></div>
+    <p class="status" id="status" role="status"></p>
+    <button type="button" id="dlBtn" class="btn primary big" aria-disabled="true">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></svg>
+      Download File
+    </button>
+  </section>
+</main>
+
+<footer>
+  <p>Made for Developers</p>
+  <p>Supported languages: HTML, CSS, JavaScript</p>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 id="dlgT"></h3>
+    <p id="dlgM"></p>
+    <div class="row">
+      <button value="cancel" class="btn">Cancel</button>
+      <button value="ok" class="btn primary">Continue</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="scriptC.js"></script>
+</body>
+</html>

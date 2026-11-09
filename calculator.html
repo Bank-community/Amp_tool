@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AMP KART — Pricing Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --yellow:      #FFD600;
+  --yellow-dark: #E6C000;
+  --yellow-glow: rgba(255,214,0,0.22);
+  --black:       #000000;
+  --white:       #FFFFFF;
+  --blue:        #1E3A8A;
+  --blue-soft:   #EFF6FF;
+  --bg:          #F2F3F7;
+  --card:        #FFFFFF;
+  --border:      #E4E6EB;
+  --text:        #111111;
+  --muted:       #6B7280;
+  --green:       #16A34A;
+  --green-bg:    #DCFCE7;
+  --red:         #DC2626;
+  --warn:        #D97706;
+  --shadow:      0 2px 14px rgba(0,0,0,0.07);
+  --shadow-lg:   0 10px 36px rgba(0,0,0,0.14);
+  --radius:      16px;
+  --radius-sm:   10px;
+  --radius-xs:   8px;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 56px; }
+
+/* HEADER */
+.header { background: var(--black); padding: 0 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.45); }
+.header-inner { max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 12px; height: 64px; }
+.logo-box { width: 42px; height: 42px; background: var(--yellow); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--black); letter-spacing: 0.5px; }
+.header-title { display: flex; flex-direction: column; }
+.header-title .brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--yellow); letter-spacing: 2px; line-height: 1; }
+.header-title .sub { font-size: 10px; color: rgba(255,255,255,0.42); font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
+.header-badge { margin-left: auto; background: var(--blue); color: var(--white); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* MAIN */
+.main { max-width: 480px; margin: 0 auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* CARD */
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.card-header { display: flex; align-items: center; gap: 10px; padding: 15px 18px 0; }
+.card-icon { width: 32px; height: 32px; background: var(--black); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.card-label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.card-body { padding: 14px 18px 20px; }
+
+/* INPUT */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+.input-wrap { position: relative; }
+.rupee { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; font-weight: 700; color: var(--black); pointer-events: none; z-index: 1; }
+input[type="number"] { width: 100%; padding: 16px 14px 16px 34px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 700; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus { border-color: var(--yellow); background: var(--white); box-shadow: 0 0 0 4px var(--yellow-glow); }
+input[type="number"].error { border-color: var(--red); box-shadow: 0 0 0 4px rgba(220,38,38,0.10); }
+.hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.error-msg { font-size: 11px; color: var(--red); font-weight: 600; display: none; margin-top: 4px; }
+.error-msg.show { display: block; }
+
+/* MULTIPLIER CHIP */
+.multiplier-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--black); color: var(--yellow); font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; margin-top: 10px; letter-spacing: 0.5px; opacity: 0; transition: opacity 0.3s; }
+.multiplier-chip.show { opacity: 1; }
+
+/* BUTTON */
+.btn-calc { width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--yellow); color: var(--black); letter-spacing: 0.4px; transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-calc:hover { background: var(--yellow-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,214,0,0.38); }
+.btn-calc:active { transform: translateY(0); box-shadow: none; }
+@keyframes btnpulse { 0%{transform:scale(1)} 50%{transform:scale(0.97)} 100%{transform:scale(1)} }
+.btn-calc.pulse { animation: btnpulse 0.26s ease; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state .e-icon { font-size: 42px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; font-weight: 500; }
+.empty-state small { font-size: 12px; opacity: 0.55; }
+
+/* RESULT SECTION */
+.result-section { display: none; flex-direction: column; gap: 14px; }
+.result-section.show { display: flex; }
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── HERO — RECOMMENDED ── */
+.rec-hero { background: var(--black); border-radius: var(--radius); padding: 22px 20px 20px; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; animation: slideUp 0.32s ease both; }
+.rec-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(255,214,0,0.18) 0%, transparent 70%); pointer-events: none; }
+.rec-tag { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 4px; }
+.rec-price { font-family: 'Bebas Neue', sans-serif; font-size: 72px; color: var(--yellow); line-height: 1; letter-spacing: 1px; }
+.rec-meta { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.meta-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.75); }
+.meta-chip.profit { color: #4ADE80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.08); }
+.rec-risk-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.rec-risk-pill.safe { background: rgba(22,163,74,0.18); color: #4ADE80; }
+.rec-risk-pill.warn { background: rgba(217,119,6,0.18); color: #FCD34D; }
+.rec-risk-pill.risk { background: rgba(220,38,38,0.18); color: #F87171; }
+
+/* ── SECONDARY CARDS ── */
+.secondary-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sec-card { border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); animation: slideUp 0.36s ease both; }
+.sec-card.low-card { background: #1C1C1E; }
+.sec-card.high-card { background: var(--blue); }
+.sec-tag { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 8px; }
+.low-card .sec-tag { color: rgba(255,255,255,0.40); }
+.high-card .sec-tag { color: rgba(255,255,255,0.45); }
+.sec-price { font-family: 'Bebas Neue', sans-serif; font-size: 38px; line-height: 1; letter-spacing: 0.5px; margin-bottom: 10px; }
+.low-card .sec-price { color: #FFFFFF; }
+.high-card .sec-price { color: var(--yellow); }
+.sec-meta { display: flex; flex-direction: column; gap: 4px; }
+.sec-meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; }
+.low-card .sec-meta-row .sl { color: rgba(255,255,255,0.38); }
+.low-card .sec-meta-row .sv { color: rgba(255,255,255,0.80); }
+.high-card .sec-meta-row .sl { color: rgba(255,255,255,0.40); }
+.high-card .sec-meta-row .sv { color: rgba(255,255,255,0.85); }
+
+/* ── BREAKDOWN CARD ── */
+.breakdown-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; animation: slideUp 0.40s ease both; }
+.bk-header { background: var(--blue); padding: 13px 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.bk-header-icon { font-size: 16px; }
+.bk-header-title { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.85); flex: 1; }
+.bk-arrow { font-size: 14px; color: rgba(255,255,255,0.6); transition: transform 0.22s; }
+.bk-arrow.closed { transform: rotate(-90deg); }
+.bk-body { overflow: hidden; max-height: 600px; transition: max-height 0.32s ease; }
+.bk-body.collapsed { max-height: 0; }
+.bk-inner { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 0; }
+.bk-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.bk-row:last-child { border-bottom: none; }
+.bk-row.total { padding-top: 12px; }
+.bk-left { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 500; color: var(--text); }
+.bk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.bk-right { display: flex; align-items: center; gap: 8px; }
+.bk-pct { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg); padding: 2px 7px; border-radius: 10px; }
+.bk-val { font-size: 14px; font-weight: 700; color: var(--text); min-width: 60px; text-align: right; }
+.bk-row.total .bk-left { font-weight: 700; font-size: 13px; }
+.bk-row.total .bk-val { color: var(--blue); font-size: 15px; }
+.bk-profit-row { margin-top: 12px; background: var(--green-bg); border-radius: var(--radius-xs); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; }
+.bk-profit-label { font-size: 13px; font-weight: 700; color: var(--green); display: flex; align-items: center; gap: 6px; }
+.bk-profit-val { font-size: 18px; font-weight: 700; color: var(--green); }
+
+/* ── ANALYSIS CARD ── */
+.analysis-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; animation: slideUp 0.44s ease both; }
+.analysis-header { background: var(--black); padding: 13px 18px; display: flex; align-items: center; gap: 10px; }
+.analysis-icon { font-size: 16px; }
+.analysis-title { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+.analysis-body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.mbar-wrap { display: flex; flex-direction: column; gap: 6px; }
+.mbar-top { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--muted); }
+.mbar-top .cur { color: var(--blue); font-weight: 700; }
+.mbar { background: var(--bg); border-radius: 99px; height: 10px; overflow: hidden; }
+.mbar-fill { height: 100%; border-radius: 99px; background: var(--green); transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1), background 0.4s; }
+.risk-badge { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius-xs); border: 2px solid transparent; }
+.risk-badge.safe { background: var(--green-bg); border-color: rgba(22,163,74,0.2); }
+.risk-badge.warn { background: #FEF3C7; border-color: rgba(217,119,6,0.2); }
+.risk-badge.risk { background: #FEE2E2; border-color: rgba(220,38,38,0.2); }
+.r-emoji { font-size: 24px; line-height: 1; }
+.r-text { display: flex; flex-direction: column; gap: 2px; }
+.r-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.r-desc { font-size: 12px; color: var(--muted); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-box">AK</div>
+    <div class="header-title">
+      <span class="brand">AMP KART</span>
+      <span class="sub">Pricing Calculator</span>
+    </div>
+    <div class="header-badge">v2.0</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🏷️</div>
+      <span class="card-label">Product Cost (DP Price)</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label for="dpInput">Enter your DP / cost price</label>
+        <div class="input-wrap">
+          <span class="rupee">₹</span>
+          <input type="number" id="dpInput" placeholder="0" min="1" max="10000" autocomplete="off" />
+        </div>
+        <div class="error-msg" id="errorMsg">⚠ Please enter a valid product cost.</div>
+        <div class="hint">Range: ₹1 – ₹10,000</div>
+      </div>
+
+      <div id="multiplierChip" class="multiplier-chip">
+        <span>✕</span><span id="chipMult">—</span><span style="opacity:0.5;font-weight:400;">multiplier applied</span>
+      </div>
+
+      <div style="margin-top: 18px;">
+        <button class="btn-calc" id="calcBtn" onclick="calculate()">
+          <span>⚡</span> Calculate Price
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS AREA -->
+  <div id="emptyState" class="empty-state">
+    <div class="e-icon">🛒</div>
+    <p>Enter your product cost above</p>
+    <small>Recommended, Low & High prices will appear here</small>
+  </div>
+
+  <div class="result-section" id="resultSection">
+
+    <!-- HERO — RECOMMENDED -->
+    <div class="rec-hero">
+      <div class="rec-tag">✅ Recommended Price</div>
+      <div class="rec-price" id="rRecPrice">₹0</div>
+      <div class="rec-meta">
+        <div class="meta-chip profit">💰 Profit: <span id="rProfit">₹0</span></div>
+        <div id="riskPill" class="rec-risk-pill safe">—</div>
+      </div>
+    </div>
+
+    <!-- LOW + HIGH -->
+    <div class="secondary-prices">
+      <div class="sec-card low-card">
+        <div class="sec-tag">⬇ Low Price</div>
+        <div class="sec-price" id="rLowPrice">₹0</div>
+        <div class="sec-meta">
+          <div class="sec-meta-row">
+            <span class="sl">−5% off rec</span>
+            <span class="sv" id="rLowPct">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="sec-card high-card">
+        <div class="sec-tag">⬆ High Price</div>
+        <div class="sec-price" id="rHighPrice">₹0</div>
+        <div class="sec-meta">
+          <div class="sec-meta-row">
+            <span class="sl">+10% on rec</span>
+            <span class="sv" id="rHighPct">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN -->
+    <div class="breakdown-card">
+      <div class="bk-header" onclick="toggleBreakdown()">
+        <span class="bk-header-icon">📊</span>
+        <span class="bk-header-title">Cost Breakdown</span>
+        <span class="bk-arrow open" id="bkArrow">▼</span>
+      </div>
+      <div class="bk-body" id="bkBody">
+        <div class="bk-inner">
+
+          <div class="bk-row">
+            <div class="bk-left"><div class="bk-dot" style="background:#6366F1;"></div>Product Cost</div>
+            <div class="bk-right"><span class="bk-pct">44%</span><span class="bk-val" id="bProduct">₹0</span></div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-left"><div class="bk-dot" style="background:#0EA5E9;"></div>Delivery</div>
+            <div class="bk-right"><span class="bk-pct">18%</span><span class="bk-val" id="bDelivery">₹0</span></div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-left"><div class="bk-dot" style="background:#F59E0B;"></div>Ads + Packaging + Payment</div>
+            <div class="bk-right"><span class="bk-pct">9%</span><span class="bk-val" id="bOther">₹0</span></div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-left"><div class="bk-dot" style="background:#EF4444;"></div>RTO Buffer</div>
+            <div class="bk-right"><span class="bk-pct">8%</span><span class="bk-val" id="bRTO">₹0</span></div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-left"><div class="bk-dot" style="background:#EC4899;"></div>Donation</div>
+            <div class="bk-right"><span class="bk-pct">1%</span><span class="bk-val" id="bDonation">₹0</span></div>
+          </div>
+          <div class="bk-row total">
+            <div class="bk-left">Total (excl. Profit)</div>
+            <div class="bk-right"><span class="bk-pct">80%</span><span class="bk-val" id="bTotal">₹0</span></div>
+          </div>
+
+          <div class="bk-profit-row">
+            <div class="bk-profit-label">🟢 Profit (20%)</div>
+            <div class="bk-profit-val" id="bProfit">₹0</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYSIS -->
+    <div class="analysis-card">
+      <div class="analysis-header">
+        <div class="analysis-icon">⚠️</div>
+        <div class="analysis-title">Risk Level</div>
+      </div>
+      <div class="analysis-body">
+        <div class="mbar-wrap">
+          <div class="mbar-top">
+            <span>₹0</span>
+            <span class="cur" id="mbarLabel">—</span>
+            <span>₹120+</span>
+          </div>
+          <div class="mbar">
+            <div class="mbar-fill" id="mbarFill" style="width:0%;"></div>
+          </div>
+        </div>
+        <div class="risk-badge" id="riskBadge">
+          <div class="r-emoji" id="riskEmoji">🟡</div>
+          <div class="r-text">
+            <div class="r-label" id="riskLabel">—</div>
+            <div class="r-desc" id="riskDesc">Calculate to see risk level</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /result-section -->
+
+</main>
+
+<script>
+/* ── HELPERS ── */
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+/* ── MULTIPLIER TABLE ── */
+function getMultiplier(dp) {
+  if (dp <= 50)   return 3.5;
+  if (dp <= 100)  return 3.0;
+  if (dp <= 200)  return 2.6;
+  if (dp <= 300)  return 2.3;
+  if (dp <= 500)  return 2.0;
+  if (dp <= 700)  return 1.6;
+  if (dp <= 1000) return 1.55;
+  if (dp <= 1500) return 1.5;
+  if (dp <= 2000) return 1.4;
+  if (dp <= 3000) return 1.25;
+  if (dp <= 5000) return 1.2;
+  if (dp <= 7000) return 1.15;
+  return 1.1;
+}
+
+/* ── PSYCHOLOGICAL ROUNDING ── */
+function psychRound(price) {
+  // Target endings: 9, 49, 99, 149, 199, 249, 299, 349, 399, 449, 499...
+  const anchors = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99, 119, 129, 149, 169, 179, 199,
+                   219, 229, 249, 269, 279, 299, 329, 349, 369, 399, 429, 449, 469, 499,
+                   529, 549, 569, 599, 629, 649, 699, 749, 799, 849, 899, 949, 999,
+                   1049, 1099, 1149, 1199, 1249, 1299, 1349, 1399, 1449, 1499,
+                   1549, 1599, 1649, 1699, 1749, 1799, 1849, 1899, 1949, 1999,
+                   2099, 2199, 2299, 2399, 2499, 2599, 2699, 2799, 2899, 2999,
+                   3199, 3299, 3499, 3699, 3899, 3999, 4199, 4499, 4699, 4999,
+                   5499, 5999, 6499, 6999, 7499, 7999, 8499, 8999, 9499, 9999,
+                   10999, 11999, 12999, 13999, 14999];
+
+  // Find closest anchor >= price (round up approach for psychology)
+  // or within 15% below — whichever feels closer
+  let best = anchors[anchors.length - 1];
+  let bestDiff = Infinity;
+
+  for (const a of anchors) {
+    const diff = Math.abs(a - price);
+    if (diff < bestDiff) { bestDiff = diff; best = a; }
+  }
+  return best;
+}
+
+/* ── LIVE MULTIPLIER CHIP ── */
+document.getElementById('dpInput').addEventListener('input', function () {
+  const dp = parseFloat(this.value);
+  const chip = document.getElementById('multiplierChip');
+  const chipMult = document.getElementById('chipMult');
+  if (!isNaN(dp) && dp > 0) {
+    const m = getMultiplier(dp);
+    chipMult.textContent = m + 'x';
+    chip.classList.add('show');
+  } else {
+    chip.classList.remove('show');
+  }
+});
+
+/* ── BREAKDOWN TOGGLE ── */
+function toggleBreakdown() {
+  const body  = document.getElementById('bkBody');
+  const arrow = document.getElementById('bkArrow');
+  const isOpen = !body.classList.contains('collapsed');
+  if (isOpen) { body.classList.add('collapsed'); arrow.classList.replace('open','closed'); }
+  else        { body.classList.remove('collapsed'); arrow.classList.replace('closed','open'); }
+}
+
+/* ── MAIN CALCULATE ── */
+function calculate() {
+  const dpEl  = document.getElementById('dpInput');
+  const errEl = document.getElementById('errorMsg');
+  const btn   = document.getElementById('calcBtn');
+
+  const dp = parseFloat(dpEl.value);
+  if (!dpEl.value || isNaN(dp) || dp <= 0) {
+    dpEl.classList.add('error');
+    errEl.classList.add('show');
+    dpEl.focus();
+    setTimeout(() => { dpEl.classList.remove('error'); errEl.classList.remove('show'); }, 3000);
+    return;
+  }
+  dpEl.classList.remove('error');
+  errEl.classList.remove('show');
+
+  btn.classList.add('pulse');
+  setTimeout(() => btn.classList.remove('pulse'), 300);
+
+  /* STEP 1 — multiplier */
+  const mult = getMultiplier(dp);
+
+  /* STEP 2 — base price → psychological round */
+  const raw  = dp * mult;
+  const recPrice = psychRound(raw);
+
+  /* STEP 3 — 3 price outputs */
+  const lowPrice  = psychRound(recPrice * 0.95);
+  const highPrice = psychRound(recPrice * 1.10);
+
+  /* STEP 4 — breakdown from recommended price */
+  const bProduct  = Math.round(recPrice * 0.44);
+  const bDelivery = Math.round(recPrice * 0.18);
+  const bOther    = Math.round(recPrice * 0.09);
+  const bRTO      = Math.round(recPrice * 0.08);
+  const bDonation = Math.round(recPrice * 0.01);
+  const bProfitAmt = Math.round(recPrice * 0.20);
+  const bTotal    = bProduct + bDelivery + bOther + bRTO + bDonation;
+
+  /* STEP 5 — risk check on profit amount */
+  const profit = bProfitAmt;
+
+  /* ── POPULATE DOM ── */
+  document.getElementById('rRecPrice').textContent  = fmt(recPrice);
+  document.getElementById('rProfit').textContent    = fmt(profit);
+  document.getElementById('rLowPrice').textContent  = fmt(lowPrice);
+  document.getElementById('rLowPct').textContent    = fmt(lowPrice);
+  document.getElementById('rHighPrice').textContent = fmt(highPrice);
+  document.getElementById('rHighPct').textContent   = fmt(highPrice);
+
+  document.getElementById('bProduct').textContent  = fmt(bProduct);
+  document.getElementById('bDelivery').textContent = fmt(bDelivery);
+  document.getElementById('bOther').textContent    = fmt(bOther);
+  document.getElementById('bRTO').textContent      = fmt(bRTO);
+  document.getElementById('bDonation').textContent = fmt(bDonation);
+  document.getElementById('bTotal').textContent    = fmt(bTotal);
+  document.getElementById('bProfit').textContent   = fmt(profit);
+
+  /* margin bar: map ₹0–₹200 → 0%–100% */
+  const barW = Math.min(100, Math.round((profit / 200) * 100));
+  const fill  = document.getElementById('mbarFill');
+  fill.style.width = barW + '%';
+  document.getElementById('mbarLabel').textContent = fmt(profit) + ' profit';
+
+  /* risk badge + pill */
+  const badge  = document.getElementById('riskBadge');
+  const pill   = document.getElementById('riskPill');
+  const rlabel = document.getElementById('riskLabel');
+  const rdesc  = document.getElementById('riskDesc');
+  const remoji = document.getElementById('riskEmoji');
+
+  badge.className = 'risk-badge';
+  pill.className  = 'rec-risk-pill';
+
+  if (profit < 70) {
+    badge.classList.add('risk'); pill.classList.add('risk');
+    pill.textContent   = '⚠️ LOW PROFIT — RISKY';
+    rlabel.textContent = '⚠️ Low Profit — Risky';
+    remoji.textContent = '🔴';
+    rdesc.textContent  = `Only ${fmt(profit)} profit — below ₹70 threshold. Consider raising price.`;
+    fill.style.background = 'var(--red)';
+  } else if (profit <= 120) {
+    badge.classList.add('warn'); pill.classList.add('warn');
+    pill.textContent   = '✅ SAFE';
+    rlabel.textContent = '✅ Safe';
+    remoji.textContent = '🟡';
+    rdesc.textContent  = `${fmt(profit)} profit — within safe range (₹70–₹120).`;
+    fill.style.background = 'var(--warn)';
+  } else {
+    badge.classList.add('safe'); pill.classList.add('safe');
+    pill.textContent   = '💪 STRONG';
+    rlabel.textContent = '💪 Strong Profit';
+    remoji.textContent = '🟢';
+    rdesc.textContent  = `${fmt(profit)} profit — excellent! Above ₹120 target.`;
+    fill.style.background = 'var(--green)';
+  }
+
+  /* show results */
+  document.getElementById('emptyState').style.display = 'none';
+  const res = document.getElementById('resultSection');
+  res.classList.add('show');
+  setTimeout(() => res.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+/* ENTER KEY */
+document.getElementById('dpInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>

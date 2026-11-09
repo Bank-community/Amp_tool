@@ -1,0 +1,60 @@
+{
+  "name": "AMP KART Tool OS",
+  "short_name": "AMP KART",
+  "description": "AMP KART Control Panel - All your business tools in one place.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["business", "utilities", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "AMP KART Tool OS Home"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pricing Calculator",
+      "short_name": "Calculator",
+      "description": "Open Pricing Calculator",
+      "url": "/calculator.html",
+      "icons": [{ "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg", "sizes": "96x96" }]
+    },
+    {
+      "name": "QR Generator",
+      "short_name": "QR Gen",
+      "description": "Open QR Generator",
+      "url": "/qr.html",
+      "icons": [{ "src": "https://ik.imagekit.io/nsyr92pse/1000201093-optimized.jpg", "sizes": "96x96" }]
+    }
+  ]
+}
